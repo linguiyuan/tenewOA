@@ -1,8 +1,8 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
-
 html,
 body,
 #app,
@@ -166,4 +166,22 @@ a {
 
 .v-note-wrapper .v-note-panel {
     min-height: 500px;
+}
+
+.position {
+    height: 24px;
+    font-size: 14px;
+    color: #8f8f8f;
+    border-bottom: 1px solid #8f8f8f;
+    margin-bottom: 16px;
+}
+.position i{
+    margin-right: 4px;
+}
+.my_wap{
+    min-width: 1300px;
+    min-height: 600px;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius:20px;
 }

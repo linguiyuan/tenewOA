@@ -7,7 +7,7 @@ export default new Router({
     routes: [
         {
             path: '/',
-            redirect: '/dashboard'
+            redirect: '/datastatistics'
         },
         {
             path: '/',
@@ -15,14 +15,19 @@ export default new Router({
             meta: { title: '自述文件' },
             children:[
                 {
-                    path: '/dashboard',
-                    component: resolve => require(['../components/page/Dashboard.vue'], resolve),
-                    meta: { title: '系统首页' }
+                    path: '/datastatistics',
+                    component: resolve => require(['../components/page/dataDtatistics.vue'], resolve),
+                    meta: { title: '实时数据' }
                 },
                 {
-                    path: '/table',
-                    component: resolve => require(['../components/page/BaseTable.vue'], resolve),
-                    meta: { title: '订单处理' }
+                    path: '/daydata',
+                    component: resolve => require(['../components/page/dayData.vue'], resolve),
+                    meta: { title: '每日数据' }
+                },
+                {
+                    path: '/money',
+                    component: resolve => require(['../components/page/money.vue'], resolve),
+                    meta: { title: '转账提现' }
                 },
                 {
                     path: '/tabs',
@@ -39,7 +44,7 @@ export default new Router({
                     path: '/manage',
                     component: resolve => require(['../components/page/manage.vue'], resolve),
                     meta: { title: '功能管理', permission: true }
-                }
+                },
             ]
         },
         {
