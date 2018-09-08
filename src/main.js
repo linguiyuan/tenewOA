@@ -7,11 +7,14 @@ import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
 // import '../static/css/theme-green/index.css';       // 浅绿色主题
 import qs from 'qs'
 import "babel-polyfill";
+import vfilters from './components/common/vfilters'
 
 Vue.use(ElementUI, { size: 'small' });
 Vue.prototype.$axios = axios;
 Vue.prototype.$qs = qs;
-
+for(let key in vfilters){
+    Vue.filter(key,vfilters[key]);
+}
 //使用钩子函数对路由进行权限跳转
 router.beforeEach((to, from, next) => {
     const role = sessionStorage.getItem('userName');

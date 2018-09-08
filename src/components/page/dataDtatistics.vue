@@ -16,10 +16,10 @@
             </el-date-picker>
             <el-button type="primary" style='margin-left: 15px;' @click='getEveryDay'>点击搜索</el-button>
             <p class="shortcut">
-                <span @click='getAxios("time=today")'>今日</span>
-                <span @click='getAxios("time=yesterday")'>昨日</span>
-                <span @click='getAxios("time=this_month")'>本月</span>
-                <span @click='getAxios("time=last_month")'>上月</span>
+                <span @click='getAxios("time=today",1)' :class="{activate:at==1?true:false}">今日</span>
+                <span @click='getAxios("time=yesterday",2)' :class="{activate:at==2?true:false}">昨日</span>
+                <span @click='getAxios("time=this_month",3)' :class="{activate:at==3?true:false}">本月</span>
+                <span @click='getAxios("time=last_month",4)' :class="{activate:at==4?true:false}">上月</span>
             </p>
         </div>
         <template>
@@ -32,11 +32,21 @@
                  prop="device"
                  label="设备"
                  min-width="100">
+                    <template slot-scope="scope">
+                        <input
+                            type="text"
+                            v-model="scope.row['device']"
+                            class='device'
+                            v-on:blur="changeCount(scope.row['device'],scope.row['account'])" :disabled="scope.row['account']=='总和'?true:false">
+                    </template>
                 </el-table-column>
                 <el-table-column
                     prop="account"
                     label="账号"
                     min-width="180">
+                    <template slot-scope="scope">
+                        <span>{{scope.row['account'] | getName}}</span>
+                    </template>
                 </el-table-column>
                 <el-table-column
                     prop="payment"
@@ -85,37 +95,59 @@
             return {
                 queryTime:'',
                 content:null,
+                at:''
             }
         },
         mounted: function () {
             this.getAxios()
         },
-        filters:{
-        },
         computed: {},
         methods:{
             getEveryDay: function () {
                 let vm = this;
-                vm.getAxios(vm.$qs.stringify({
+                vm.at = null;
+                vm.getAxios({
                     start_time:vm.queryTime[0],
                     end_time:vm.queryTime[1]
-                }))
+                })
             },
-            getAxios: function (data) {
+            getAxios: function (data,nb) {
                 let vm = this;
+                if(nb){
+                    vm.at = nb;
+                }
                 vm.$axios({
                     method:'post',
                     headers:{
                         'Content-Type':'application/x-www-form-urlencoded'
                     },
                     url:window.$g_Api + '/oa/realtime_table',
-                    data:data
+                    data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
                         vm.content = res.data.data
                     })
                     .catch(function(err){});
             },
+            changeCount: function (device,account) {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api + '/oa/device',
+                    data:{
+                        data:{
+                            device:device,
+                            account:account,
+                        }
+                    }
+                })
+                   .then(function(res){
+                       if(res.data.code == 1){
+                           vm.$message.error('修改失败')
+                       }
+                   })
+                   .catch(function(err){});
+            }
         }
     }
 
@@ -144,28 +176,17 @@
                         cursor: pointer;
                     }
                 }
+                .activate{
+                    color: #e6a23c;
+                }
             }
         }
-        .my_table{
-            min-width: 1100px;
-            border-collapse: collapse;
-            thead{
-                th{
-                    text-align: left;
-                    background-color: #50bfff;
-                    color: #ffffff;
-                }
-            }
-            th,td{
-                height: 32px;
-                line-height: 32px;
-                padding-left: 10px;
-            }
-            tbody{
-                tr:nth-child(2n){
-                    background-color: rgba(204,204,204,0.15);
-                }
-            }
+        .device{
+            width: 100%;
+            background-color: transparent;
+            border:none;
+            color: #606266;
+            font-size: 12px;
         }
     }
 </style>

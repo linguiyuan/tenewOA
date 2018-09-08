@@ -16,11 +16,11 @@
             </el-date-picker>
             <el-button type="primary" style='margin-left: 15px;' @click='getEveryDay'>点击搜索</el-button>
             <p class="shortcut">
-                <span @click='getAxios("dbname=amount")'>付款金额</span>
-                <span @click='getAxios("dbname=settlement")'>结算金额</span>
-                <span @click='getAxios("dbname=est_effect")'>效果预估</span>
-                <span @click='getAxios("dbname=set_effect")'>结算预估</span>
-                <span @click='getAxios("dbname=effective_order")'>订单数量</span>
+                <span @click='getAxios({"dbname":"amount","start_time":queryTime[0],"end_time":queryTime[1]},1)' :class="{activate:at==1?true:false}">付款金额</span>
+                <span @click='getAxios({"dbname":"settlement","start_time":queryTime[0],"end_time":queryTime[1]},2)' :class="{activate:at==2?true:false}">结算金额</span>
+                <span @click='getAxios({"dbname":"est_effect","start_time":queryTime[0],"end_time":queryTime[1]},3)' :class="{activate:at==3?true:false}">效果预估</span>
+                <span @click='getAxios({"dbname":"set_effect","start_time":queryTime[0],"end_time":queryTime[1]},4)' :class="{activate:at==4?true:false}">结算预估</span>
+                <span @click='getAxios({"dbname":"effective_order","start_time":queryTime[0],"end_time":queryTime[1]},5)' :class="{activate:at==5?true:false}">订单数量</span>
             </p>
         </div>
         <div class="my_table_box">
@@ -58,9 +58,24 @@
                     <el-table-column v-for='(value,key,index) in title' :key='index'
                         highlight-current-row= true
                         :fixed='index<2?true:false'
-                        :prop="key"
                         :label="value"
-                        :min-width="index==1?'180':'100'">
+                        :min-width="index==1?'180':'160'">
+                        <template slot-scope="scope">
+                            <input
+                                v-if="key == 't0'"
+                                class='device'
+                                :disabled="scope.row['t1']=='总和'?true:false"
+                                v-model="scope.row[key]"
+                                v-on:blur="changeCount(scope.row[key],scope.row['t1'])">
+                            <span v-else-if="key == 't1'">{{scope.row[key] | getName}}</span>
+                            <span v-else >
+                                {{scope.row['t'+index]}}
+                                <sup
+                                    :class="(scope.row['t'+index]-scope.row['t'+(index+1)]>0?'sub1':'sub2')"
+                                    style='margin-left: 6px;'>{{[(scope.row['t'+index]),(scope.row['t'+(index+1)])] | setSub()}}
+                                </sup>
+                            </span>
+                        </template>
                     </el-table-column>
                 </el-table>
             </template>
@@ -76,48 +91,80 @@
                 queryTime:'',
                 title:null,
                 content:null,
-                propArr:[]
+                propArr:[],
+                at:null
             }
         },
         mounted: function () {
             this.getAxios()
         },
-        filters:{
+        computed:{
+            data: function (key,the,last) {
+
+            },
         },
         computed: {},
         methods:{
             getEveryDay: function () {
                 let vm = this;
-                vm.getAxios(vm.$qs.stringify({
+                vm.at = null
+                vm.getAxios({
                     start_time:vm.queryTime[0],
                     end_time:vm.queryTime[1]
-                }))
+                })
             },
-            getAxios: function (data) {
+            getAxios: function (data,nb) {
                 let vm = this;
+                if(nb){
+                    vm.at = nb;
+                }
                 vm.$axios({
                     method:'post',
                     headers:{
                         'Content-Type':'application/x-www-form-urlencoded'
                     },
                     url:window.$g_Api + '/oa/everyday_table',
-                    data:data
+                    data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
-                        let obj1={};
-                        let arr = [];
-                        for(let i = 0 ,len = res.data.content.length ; i < len; i++){
-                            let obj={};
-                            for(let e = 0 ,len =res.data.content[i].length  ; e < len; e++){
-                                obj['t'+e] = res.data.content[i][e];
-                            }
-                            arr.push(obj);
+                        // let obj1={};
+                        // let arr = [];
+                        // for(let i = 0 ,len = res.data.content.length ; i < len; i++){
+                        //     let obj={};
+                        //     for(let e = 0 ,len =res.data.content[i].length  ; e < len; e++){
+                        //         obj['t'+e] = res.data.content[i][e];
+                        //     }
+                        //     arr.push(obj);
+                        // }
+                        // for(let i = 0 ,len = res.data.title.length ; i < len; i++){
+                        //     obj1['t'+i] = res.data.title[i];
+                        // }
+                        if(res.data.code == 0){
+                            vm.content = res.data.data.content;
+                            vm.title = res.data.data.title;
+                        }else {
+                            vm.$message.error(res.data.message);
                         }
-                        for(let i = 0 ,len = res.data.title.length ; i < len; i++){
-                            obj1['t'+i] = res.data.title[i];
+
+                    })
+                    .catch(function(err){});
+            },
+            changeCount: function (device,account) {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api + '/oa/device',
+                    data:{
+                        data:{
+                            device:device,
+                            account:account,
                         }
-                        vm.content = arr;
-                        vm.title = obj1;
+                    }
+                })
+                    .then(function(res){
+                        if(res.data.code == 1){
+                            vm.$message.error('修改失败')
+                        }
                     })
                     .catch(function(err){});
             }
@@ -149,6 +196,9 @@
                         cursor: pointer;
                     }
                 }
+                .activate{
+                    color: #e6a23c;
+                }
             }
         }
         .my_table_box{
@@ -161,6 +211,19 @@
                 th{
                     background-color: #50bfff;
                 }
+            }
+            .sub1{
+                color: #f56c6c;
+            }
+            .sub2{
+                color: #5daf34;
+            }
+            .device{
+                width: 100%;
+                background-color: transparent;
+                border:none;
+                color: #606266;
+                font-size: 12px;
             }
         }
     }
