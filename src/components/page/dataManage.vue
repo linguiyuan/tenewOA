@@ -1,5 +1,5 @@
 <template>
-    <div id="recharge">
+    <div id="dataManage">
         <img class='alipayCode' src="static/img/327552709660388901.jpg" alt="">
         <div class="text_box">
             <h3>充值规则</h3>
@@ -14,14 +14,14 @@
 <script>
     import Schart from 'vue-schart';
     export default {
-        name: 'basecharts',
+        name: 'dataManage',
         data: () => ({
         })
     }
 </script>
 
 <style lang='scss' scoped>
-#recharge{
+#dataManage{
     width: 800px;
     height: 600px;
     background-color: #ffffff;

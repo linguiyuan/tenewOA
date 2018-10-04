@@ -5,7 +5,7 @@
             <template v-for="item in items">
                 <template v-if="item.subs">
                     <el-submenu :index="item.index" :key="item.index">
-                        <template slot="title">
+                        <template slot="title" v-show=item.power>
                             <i :class="item.icon"></i><span slot="title">{{ item.title }}</span>
                         </template>
                         <el-menu-item v-for="(subItem,i) in item.subs" :key="i" :index="subItem.index">
@@ -14,7 +14,7 @@
                     </el-submenu>
                 </template>
                 <template v-else>
-                    <el-menu-item :index="item.index" :key="item.index">
+                    <el-menu-item :index="item.index" :key="item.index" v-show=item.power>
                         <i :class="item.icon"></i><span slot="title">{{ item.title }}</span>
                     </el-menu-item>
                 </template>
@@ -25,6 +25,7 @@
 
 <script>
     import bus from '../common/bus';
+    let power = JSON.parse(sessionStorage.getItem('power'))
     export default {
         data() {
             return {
@@ -37,36 +38,58 @@
                         subs: [
                             {
                                 index: 'datastatistics',
-                                title: '实时数据'
+                                title: '实时数据',
+                                power:power.datastatistics
                             },
                             {
                                 index: 'daydata',
-                                title: '每日数据'
+                                title: '每日数据',
+                                power:power.daydata
+                            },
+                            {
+                                index: 'oacustomer',
+                                title: '客户人数',
+                                power:power.customer
                             },
                         ]
                     //    各项数据(各类数据展示),每日数据(单项数据展示,按日期排序),用户数统计(记录操作日志)
                     },
-                    {
-                        icon: 'el-icon-tickets',
-                        index: 'tabs',
-                        title: '数据分析',
-                    //    订单比,产出比
-                    },
-                    {
-                        icon: 'el-icon-mobile-phone',
-                        index: 'recharge',
-                        title: '数据管理',
-                    //    设置分组,分组数据展示
-                    },
+                    // {
+                    //     icon: 'el-icon-tickets',
+                    //     index: 'dataAnalysis',
+                    //     title: '数据分析',
+                    //     power:power.datastatistics
+                    // //    订单比,产出比
+                    // },
+                    // {
+                    //     icon: 'el-icon-mobile-phone',
+                    //     index: 'dataManage',
+                    //     title: '数据管理',
+                    //     power:power.dataManage
+                    // //    设置分组,分组数据展示
+                    // },
                     {
                         icon: 'el-icon-edit',
-                        index: 'money',
+                        index: '2',
                         title: '提现转账',
+                        subs:[
+                            {
+                                index: 'money',
+                                title: '新建转账',
+                                power:power.money,
+                            },
+                            {
+                                index: 'moneylog',
+                                title: '转账记录',
+                                power:power.money,
+                            },
+                        ]
                     },
                     {
                         icon: 'el-icon-warning',
                         index: 'manage',
                         title: '权限管理',
+                        power:power.manage
                     },
                     // {
                     //     icon: 'el-icon-error',

@@ -10,6 +10,45 @@ import "babel-polyfill";
 import vfilters from './components/common/vfilters'
 
 Vue.use(ElementUI, { size: 'small' });
+//http请求配置
+axios.defaults.withCredentials=true;
+axios.defaults.headers={
+    "Content-Type": "application/x-www-form-urlencoded"
+}
+// axios.defaults.headers.common["Authorization-Token"] = '';
+// http request 拦截器x`
+// axios.interceptors.request.use(
+//     config => {
+//         config.withCredentials = true
+        //
+        // if (sessionStorage.getItem('token')) {  // 判断是否存在token，如果存在的话，则每个http header都加上token
+        //     config.headers.common['Authorization-Token'] = 'tmd';
+        // }
+    //     return config;
+    // },
+    // err => {
+    //     return Promise.reject(err);
+    // });
+// http response 拦截器
+// axios.interceptors.response.use(
+//     response => {
+//         return response;
+//     },
+//     error => {
+//         if (error.response) {
+//             switch (error.response.status) {
+//                 case 401:
+//                     // 返回 401 清除token信息并跳转到登录页面
+//                     sessionStorage.removeItem('token')
+//                     router.replace({
+//                         path: 'login',
+//                         query: {redirect: router.currentRoute.fullPath}
+//                     })
+//             }
+//         }
+//         return Promise.reject(error.response.data)   // 返回接口返回的错误信息
+//     });
+
 Vue.prototype.$axios = axios;
 Vue.prototype.$qs = qs;
 for(let key in vfilters){
@@ -17,21 +56,11 @@ for(let key in vfilters){
 }
 //使用钩子函数对路由进行权限跳转
 router.beforeEach((to, from, next) => {
-    const role = sessionStorage.getItem('userName');
-    if(!role && to.path !== '/login'){
+    let token = sessionStorage.getItem('token');
+    if(!token && to.path !== '/login'){
         next('/login');
-    }else if(to.meta.permission){
-        // 如果是管理员权限则可进入，这里只是简单的模拟管理员权限而已
-        role === 'root'? next() : next('/403');
-    }else{
-        // 简单的判断IE10及以下不进入富文本编辑器，该组件不兼容
-        if(navigator.userAgent.indexOf('MSIE') > -1 && to.path === '/editor'){
-            Vue.prototype.$alert('vue-quill-editor组件不兼容IE10及以下浏览器，请使用更高版本的浏览器查看', '浏览器不兼容通知', {
-                confirmButtonText: '确定'
-            });
-        }else{
-            next();
-        }
+    }else {
+        next();
     }
 })
 

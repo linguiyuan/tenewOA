@@ -1,6 +1,6 @@
 <template>
     <div id='everyDayOrders' class='my_wap'>
-        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：实时订单汇总</p>
+        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：每日数据</p>
         <div class="da_header">
             <p>查询时间：</p>
             <el-date-picker
@@ -58,8 +58,7 @@
                     <el-table-column v-for='(value,key,index) in title' :key='index'
                         highlight-current-row= true
                         :fixed='index<2?true:false'
-                        :label="value"
-                        :min-width="index==1?'180':'160'">
+                        :label="value">
                         <template slot-scope="scope">
                             <input
                                 v-if="key == 't0'"
@@ -118,12 +117,12 @@
                 if(nb){
                     vm.at = nb;
                 }
+                if(!data){
+                    data = {token:sessionStorage.getItem('token')}
+                }
                 vm.$axios({
                     method:'post',
-                    headers:{
-                        'Content-Type':'application/x-www-form-urlencoded'
-                    },
-                    url:window.$g_Api + '/oa/everyday_table',
+                    url:window.$g_Api + '/oa/daydata',
                     data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
@@ -158,6 +157,7 @@
                         data:{
                             device:device,
                             account:account,
+                            token:sessionStorage.getItem('token')
                         }
                     }
                 })
@@ -202,8 +202,8 @@
             }
         }
         .my_table_box{
-            width: 1100px;
-            height: 1000px;
+            width: 100%;
+            height: 100%;
             div.cell{
                 white-space:nowrap !important;
             }

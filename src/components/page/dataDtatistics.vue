@@ -1,6 +1,6 @@
 <template>
     <div id='nowtimeOrders' class='my_wap'>
-        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：实时订单汇总</p>
+        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：实时数据</p>
         <div class="da_header">
             <p>查询时间：</p>
             <el-date-picker
@@ -30,8 +30,7 @@
                 style="width: 100%">
                 <el-table-column
                  prop="device"
-                 label="设备"
-                 min-width="100">
+                 label="设备">
                     <template slot-scope="scope">
                         <input
                             type="text"
@@ -42,8 +41,7 @@
                 </el-table-column>
                 <el-table-column
                     prop="account"
-                    label="账号"
-                    min-width="180">
+                    label="账号">
                     <template slot-scope="scope">
                         <span>{{scope.row['account'] | getName}}</span>
                     </template>
@@ -90,7 +88,7 @@
 
 <script>
     export default {
-        name: 'dashboard',
+        name: 'datadtatistics',
         data() {
             return {
                 queryTime:'',
@@ -108,20 +106,24 @@
                 vm.at = null;
                 vm.getAxios({
                     start_time:vm.queryTime[0],
-                    end_time:vm.queryTime[1]
+                    end_time:vm.queryTime[1],
+                    token:sessionStorage.getItem('token')
                 })
             },
             getAxios: function (data,nb) {
                 let vm = this;
+                data = vm.$qs.parse(data);
                 if(nb){
                     vm.at = nb;
                 }
+                if(!data){
+                    data = {token:sessionStorage.getItem('token')}
+                }else if(!data.token){
+                    data.token = sessionStorage.getItem('token')
+                }
                 vm.$axios({
                     method:'post',
-                    headers:{
-                        'Content-Type':'application/x-www-form-urlencoded'
-                    },
-                    url:window.$g_Api + '/oa/realtime_table',
+                    url:window.$g_Api + '/oa/datastatistics',
                     data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
@@ -135,10 +137,9 @@
                     method:'post',
                     url:window.$g_Api + '/oa/device',
                     data:{
-                        data:{
                             device:device,
                             account:account,
-                        }
+                            token:sessionStorage.getItem('token')
                     }
                 })
                    .then(function(res){

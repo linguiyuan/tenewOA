@@ -1,5 +1,5 @@
 <template>
-    <div id="oderInfo">
+    <div id="dataAnalysis">
         <table cellpadding='0px' cellspacing='0px'>
             <thead>
                 <tr>
@@ -37,7 +37,7 @@
 
 <script>
     export default {
-        name: 'tabs',
+        name: 'dataAnalysis',
         data() {
             return {
                 dataList:[
@@ -132,7 +132,7 @@
 </script>
 
 <style scoped>
-    #oderInfo{
+    #dataAnalysis{
         min-width: 1300px;
         background-color: #ffffff;
         padding: 10px;

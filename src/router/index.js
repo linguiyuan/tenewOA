@@ -27,17 +27,27 @@ export default new Router({
                 {
                     path: '/money',
                     component: resolve => require(['../components/page/money.vue'], resolve),
-                    meta: { title: '转账提现' }
+                    meta: { title: '新建转账' }
                 },
                 {
-                    path: '/tabs',
-                    component: resolve => require(['../components/page/Tabs.vue'], resolve),
-                    meta: { title: '订单详情' }
+                    path: '/moneylog',
+                    component: resolve => require(['../components/page/moneylog.vue'], resolve),
+                    meta: { title: '新建转账' }
                 },
                 {
-                    path: '/recharge',
-                    component: resolve => require(['../components/page/recharge.vue'], resolve),
-                    meta: { title: '充值' }
+                    path: '/dataAnalysis',
+                    component: resolve => require(['../components/page/dataAnalysis.vue'], resolve),
+                    meta: { title: '数据分析' }
+                },
+                {
+                    path: '/dataManage',
+                    component: resolve => require(['../components/page/dataManage.vue'], resolve),
+                    meta: { title: '数据管理' }
+                },
+                {
+                    path: '/oacustomer',
+                    component: resolve => require(['../components/page/oacustomer.vue'], resolve),
+                    meta: { title: '客户人数' }
                 },
                 {
                     // 权限页面

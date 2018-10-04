@@ -42,20 +42,19 @@
             submitForm(formName) {
                 let vm = this;
                 vm.$refs[formName].validate((valid) => {
-                    sessionStorage.setItem('userName',vm.ruleForm.username);
-                    vm.$router.push('/');
-                    /*
                     if (valid) {
                         vm.loading = true;
                         vm.$axios({
                             method:'post',
-                            url:window.$g_Api+'/login',
+                            url:window.$g_Api+'/oa/login',
                             data: vm.$qs.stringify(vm.ruleForm)
                         })
                            .then(function(res){
                                vm.loading  = false;
                                if(res.data.code == 0){
                                    sessionStorage.setItem('role',res.data.data.role);
+                                   sessionStorage.setItem('power',JSON.stringify(res.data.data.auth));
+                                   sessionStorage.setItem('token',res.data.data.token);
                                    sessionStorage.setItem('userName',vm.ruleForm.username);
                                    vm.$router.push('/');
                                }else {
@@ -67,8 +66,20 @@
                         console.log('error submit!!');
                         return false;
                     }
-                    */
+
                 });
+            },
+            getName:  function (cname) {
+                var name = cname + "=";
+                var ca = document.cookie.split(';');
+                for (var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1);
+                    if (c.indexOf(name) != -1){
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return "";
             },
         }
     }
