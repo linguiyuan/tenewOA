@@ -56,7 +56,7 @@
         },
         computed:{
             username(){
-                let username = sessionStorage.getItem('userName');
+                let username = this.$store.state.userName;
                 return username ? username : this.name;
             }
         },
@@ -64,7 +64,7 @@
             // 用户名下拉菜单选择事件
             handleCommand(command) {
                 if(command == 'loginout'){
-                    sessionStorage.getItem('userType')
+                    this.$store.commit('logoutToken');
                     this.$router.push('/login');
                 }
             },

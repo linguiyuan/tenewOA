@@ -52,10 +52,12 @@
                            .then(function(res){
                                vm.loading  = false;
                                if(res.data.code == 0){
+                                   //更改store中token值
+                                   vm.$store.commit('loginToken',res.data.data.token)
                                    sessionStorage.setItem('role',res.data.data.role);
                                    sessionStorage.setItem('power',JSON.stringify(res.data.data.auth));
-                                   sessionStorage.setItem('token',res.data.data.token);
-                                   sessionStorage.setItem('userName',vm.ruleForm.username);
+                                   //保存用户名
+                                   vm.$store.commit('setUserName',vm.ruleForm.username)
                                    vm.$router.push('/');
                                }else {
                                    vm.$message.error(res.data.message)

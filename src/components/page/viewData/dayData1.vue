@@ -54,6 +54,7 @@
                     :data="content"
                     stripe
                     height="450"
+                    v-loading='loading'
                     style="width: 100%">
                     <el-table-column v-for='(value,key,index) in title' :key='index'
                         highlight-current-row= true
@@ -63,9 +64,8 @@
                             <input
                                 v-if="key == 't0'"
                                 class='device'
-                                :disabled="scope.row['t1']=='总和'?true:false"
-                                v-model="scope.row[key]"
-                                v-on:blur="changeCount(scope.row[key],scope.row['t1'])">
+                                :disabled="true"
+                                v-model="scope.row[key]">
                             <span v-else-if="key == 't1'">{{scope.row[key] | getName}}</span>
                             <span v-else >
                                 {{scope.row['t'+index]}}
@@ -91,7 +91,8 @@
                 title:null,
                 content:null,
                 propArr:[],
-                at:null
+                at:null,
+                loading:true,
             }
         },
         mounted: function () {
@@ -114,6 +115,7 @@
             },
             getAxios: function (data,nb) {
                 let vm = this;
+                vm.loading = true;
                 if(nb){
                     vm.at = nb;
                 }
@@ -138,6 +140,7 @@
                         // for(let i = 0 ,len = res.data.title.length ; i < len; i++){
                         //     obj1['t'+i] = res.data.title[i];
                         // }
+                        vm.loading = false;
                         if(res.data.code == 0){
                             vm.content = res.data.data.content;
                             vm.title = res.data.data.title;

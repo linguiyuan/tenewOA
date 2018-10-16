@@ -2,7 +2,7 @@
     <div id="money">
         <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：新建转账</p>
         <div class="btn_box">
-            <el-button type="primary" @click=initWebSocket style='height: 36px;'>新建转账</el-button>
+            <el-button type="primary" @click=initWebSocket style='height: 36px;'>启动程序</el-button>
             <!--<el-button type="primary" @click=initWebSocket>上传文件</el-button>-->
             <el-upload
                 class="upload-demo"
@@ -40,7 +40,7 @@
                 //初始化weosocket
                 this.websockData = ['程序启动中......'];
                 if ("WebSocket" in window) {
-                    const wsuri = "ws://47.106.39.104:80/oa/money";
+                    const wsuri = "ws://"+window.$g_Api2+"/oa/exec_each_machines";
                     this.websock = new WebSocket(wsuri);
                     this.websock.onmessage = this.websocketonmessage;
                     this.websock.onopen = this.websocketonopen;
@@ -60,7 +60,6 @@
             },
             websocketonmessage(e){ //数据接收
                 this.websockData.push(this.$qs.parse(e.data));
-                console.log(this.websockData);
             },
             websocketsend(Data){//数据发送
                 this.websock.send(Data);
@@ -69,13 +68,12 @@
                 if(this.websock.readyState == 3 && !!this.websock){
                     this.websockData.push('执行完毕,断开连接')
                     this.load = false;
-                    window.location.href = window.$g_Api+"/oa/download_transfer_file"
+                    window.location.href = window.$g_Api+"/oa/download_transfer_excel"
                 }else {
                     this.websockData.push('程序出错,断开连接')
                 }
             },
             uploadFile: function (response, file, fileList) {
-                console.log(response);
                 if(response.code == 0){
                     this.$message.success('上传成功')
                 }else {
@@ -86,6 +84,21 @@
             error: function (err, file, fileList) {
                 console.log(err);
                 this.$message.error(err.message)
+            },
+            pay: function (data) {
+                let vm = this;
+                if(!data){
+                    data = {token:sessionStorage.getItem('token')}
+                }
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/money',
+                    data:vm.$qs.stringify(data)
+                })
+                   .then(function(res){
+                       console.log(res.data);
+                   })
+                   .catch(function(err){});
             }
         },
         destroyed() {
@@ -114,7 +127,6 @@
             overflow-y: auto;
             padding: 10px;
             background-color: #ffffff;
-            margin-top: 20px;
         }
     }
 

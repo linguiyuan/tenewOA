@@ -17,7 +17,7 @@
             <el-button type="primary" style='margin-left: 15px;' @click='getData(queryTime[0],queryTime[1])'>点击搜索</el-button>
         </div>
         <div class="logBox">
-            <table class='logtable' v-if='result'>
+            <table class='logtable' v-if='result' v-loading='loading'>
                 <thead>
                 <tr>
                     <th>金额</th>
@@ -29,7 +29,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for='(data,index) in result' :key='index'>
+                <tr v-for='(data,index) in result' :key='index' :class='{"error":data.status=="转账成功"?false:true}'>
                     <td>{{data.amount}}</td>
                     <td>{{data.account}}</td>
                     <td>{{data.name}}</td>
@@ -52,6 +52,7 @@
             return {
                 queryTime:null,
                 result:null,
+                loading:false
             }
         },
         mounted: function () {
@@ -60,6 +61,7 @@
         methods:{
             getData: function (time1,time2) {
                 let vm = this;
+                vm.loading = true;
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api+'/oa/record',
@@ -71,7 +73,7 @@
                     })
                 })
                    .then(function(res){
-                       console.log(res.data);
+                       vm.loading = false;
                        if(res.data.code == 0){
                            vm.result = res.data.data;
                        }else {
@@ -113,6 +115,9 @@
                     cursor: pointer;
                     background-color: rgba(204,204,204,0.3)
                 }
+            }
+            .error{
+                color:red;
             }
         }
         .da_header{

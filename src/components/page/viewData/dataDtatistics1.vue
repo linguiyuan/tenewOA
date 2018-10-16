@@ -26,18 +26,12 @@
             <el-table
                 :data="content"
                 stripe
+                v-loading="loading"
                 height="450"
                 style="width: 100%">
                 <el-table-column
                  prop="device"
                  label="设备">
-                    <template slot-scope="scope">
-                        <input
-                            type="text"
-                            v-model="scope.row['device']"
-                            class='device'
-                            v-on:blur="changeCount(scope.row['device'],scope.row['account'])" :disabled="scope.row['account']=='总和'?true:false">
-                    </template>
                 </el-table-column>
                 <el-table-column
                     prop="account"
@@ -93,7 +87,8 @@
             return {
                 queryTime:'',
                 content:null,
-                at:''
+                at:'',
+                loading:true
             }
         },
         mounted: function () {
@@ -112,6 +107,7 @@
             },
             getAxios: function (data,nb) {
                 let vm = this;
+                vm.loading = true;
                 data = vm.$qs.parse(data);
                 if(nb){
                     vm.at = nb;
@@ -127,6 +123,7 @@
                     data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
+                        vm.loading = false;
                         vm.content = res.data.data
                     })
                     .catch(function(err){});
