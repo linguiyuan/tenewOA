@@ -52,12 +52,13 @@
                            .then(function(res){
                                vm.loading  = false;
                                if(res.data.code == 0){
-                                   //更改store中token值
-                                   vm.$store.commit('loginToken',res.data.data.token)
+                                   //更改store中token,role,auth
+                                   sessionStorage.setItem('token',res.data.data.token);
+                                   sessionStorage.getItem('token')
                                    sessionStorage.setItem('role',res.data.data.role);
-                                   sessionStorage.setItem('power',JSON.stringify(res.data.data.auth));
-                                   //保存用户名
-                                   vm.$store.commit('setUserName',vm.ruleForm.username)
+                                   sessionStorage.setItem('uid',res.data.data.uid);
+                                   sessionStorage.setItem('auth',JSON.stringify(res.data.data.auth));
+                                   sessionStorage.setItem('username',vm.ruleForm.username);
                                    vm.$router.push('/');
                                }else {
                                    vm.$message.error(res.data.message)

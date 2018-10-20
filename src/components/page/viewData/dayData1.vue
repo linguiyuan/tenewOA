@@ -1,6 +1,6 @@
 <template>
     <div id='everyDayOrders' class='my_wap'>
-        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：每日数据</p>
+        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：数据统计 > 每日数据</p>
         <div class="da_header">
             <p>查询时间：</p>
             <el-date-picker

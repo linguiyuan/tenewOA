@@ -8,12 +8,12 @@
                         <template slot="title">
                             <i :class="item.icon"></i><span slot="title">{{ item.title }}</span>
                         </template>
-                        <el-menu-item v-for="(subItem,i) in item.subs" :key="i" :index="subItem.index">
+                        <el-menu-item v-for="(subItem,i) in item.subs" :key="i" :index="subItem.index" v-show='subItem.power'>
                             {{ subItem.title }}
                         </el-menu-item>
                     </el-submenu>
                 </template>
-                <template v-else>
+                <template v-else v-show='item.power'>
                     <el-menu-item :index="item.index" :key="item.index">
                         <i :class="item.icon"></i><span slot="title">{{ item.title }}</span>
                     </el-menu-item>
@@ -25,8 +25,7 @@
 
 <script>
     import bus from '../common/bus';
-
-    let power = JSON.parse(sessionStorage.getItem('power'))
+    let power = JSON.parse(sessionStorage.getItem('auth'));
     export default {
         data() {
             return {
@@ -40,21 +39,23 @@
                             {
                                 index: 'datastatistics1',
                                 title: '实时数据',
-                                power: power.datastatistics
+                                power: power.datastatistics1
                             },
                             {
                                 index: 'daydata1',
                                 title: '每日数据',
-                                power: power.daydata
+                                power: power.daydata1
                             },
                             {
                                 index: 'oacustomer1',
                                 title: '客户人数',
-                                power: power.customer
+                                power: power.oacustomer1
                             },
                             {
                                 index: 'order1',
                                 title: '订单比',
+                                power: power.order1
+
                             },
                             {
                                 index: 'achievement1',
@@ -67,11 +68,13 @@
                             {
                                 index: 'moneylog1',
                                 title: '转账记录',
-                                power: power.money,
+                                power: power.moneylog1,
                             },
                             {
                                 index: 'devices1',
-                                title: '设备管理'
+                                title: '设备管理',
+                                power: power.devices1,
+
                             },
                         ]
                         //    各项数据(各类数据展示),每日数据(单项数据展示,按日期排序),用户数统计(记录操作日志)
@@ -84,38 +87,47 @@
                             {
                                 index: 'datastatistics2',
                                 title: '实时数据',
-                                power: power.datastatistics
+                                power: power.datastatistics2
                             },
                             {
                                 index: 'daydata2',
                                 title: '每日数据',
-                                power: power.daydata
+                                power: power.daydata2
                             },
                             {
                                 index: 'oacustomer2',
                                 title: '客户人数',
-                                power: power.customer
+                                power: power.customer2
                             },
                             {
                                 index: 'order2',
                                 title: '订单比',
+                                power: power.order2
+
                             },
                             {
                                 index: 'achievement2',
                                 title: '员工绩效',
+                                power: power.achievement2
+
                             },
                             {
                                 index: 'profits2',
                                 title: '股东收益',
+                                power: power.profits2
+
                             },
                             {
                                 index: 'money',
                                 title: '新建转账',
                                 power: power.money,
+
                             },
                             {
                                 index: 'devices2',
-                                title: '设备管理'
+                                title: '设备管理',
+                                power: power.devices2,
+
                             },
                         ]
                     },
@@ -128,7 +140,9 @@
                     {
                         icon: 'el-icon-plus',
                         index: 'operationlog',
-                        title: '操作日志'
+                        title: '操作日志',
+                        power: power.operationlog,
+
                     },
                 ]
             }

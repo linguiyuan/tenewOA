@@ -1,6 +1,6 @@
 <template>
     <div id="moneylog">
-        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：转账记录</p>
+        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：数据统计 > 转账记录</p>
         <div class="da_header">
             <p>查询时间：</p>
             <el-date-picker

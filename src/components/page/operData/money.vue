@@ -2,7 +2,7 @@
     <div id="money">
         <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：新建转账</p>
         <div class="btn_box">
-            <el-button type="primary" @click=initWebSocket style='height: 36px;'>启动程序</el-button>
+            <el-button type="primary" @click='open' style='height: 36px;margin-left: 10px;'>启动程序</el-button>
             <!--<el-button type="primary" @click=initWebSocket>上传文件</el-button>-->
             <el-upload
                 class="upload-demo"
@@ -36,6 +36,31 @@
         computed: {
         },
         methods: {
+            //确定启动程序提示对话框
+            open() {
+                let vm = this;
+                vm.$confirm('即将启动程序, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    center: true
+                }).then(() => {
+                    vm.initWebSocket();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消'
+                    });
+                });
+            },
+            openNew:function (url) {
+                let a = document.createElement("a"); //创建a对象
+                a.setAttribute("href", url);
+                a.setAttribute("target", "_blank");
+                a.setAttribute("id", "camnpr");
+                document.body.appendChild(a);
+                a.click(); //执行当前对象
+            },
             initWebSocket(){
                 //初始化weosocket
                 this.websockData = ['程序启动中......'];
@@ -68,7 +93,12 @@
                 if(this.websock.readyState == 3 && !!this.websock){
                     this.websockData.push('执行完毕,断开连接')
                     this.load = false;
-                    window.location.href = window.$g_Api+"/oa/download_transfer_excel"
+                    // window.location.href =window.$g_Api+"/oa/download_transfer_excel"
+                    // window.location.href ="http://www.baidu.com"
+                    // window.open(window.$g_Api+"/oa/download_transfer_excel");
+                    // this.openNew(window.$g_Api+"/oa/download_transfer_excel")
+                    this.openNew(window.$g_Api+"/oa/download_transfer_excel")
+
                 }else {
                     this.websockData.push('程序出错,断开连接')
                 }
@@ -76,6 +106,7 @@
             uploadFile: function (response, file, fileList) {
                 if(response.code == 0){
                     this.$message.success('上传成功')
+                    this.pay();
                 }else {
                     this.$message.error(response.message)
                 }

@@ -1,6 +1,6 @@
 <template>
     <div id='oacustomer' class='my_wap'>
-        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：客户人数</p>
+        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：数据统计 > 客户人数</p>
         <!--<el-button type="primary" style="margin-bottom:10px" @click="dialogVisible = true">添加</el-button>-->
         <div class="my_table_box">
             <template>

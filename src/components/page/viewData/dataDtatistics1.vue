@@ -1,6 +1,6 @@
 <template>
     <div id='nowtimeOrders' class='my_wap'>
-        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：实时数据</p>
+        <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：数据统计 > 实时数据</p>
         <div class="da_header">
             <p>查询时间：</p>
             <el-date-picker
@@ -119,7 +119,7 @@
                 }
                 vm.$axios({
                     method:'post',
-                    url:window.$g_Api + '/oa/datastatistics',
+                    url:window.$g_Api + '/oa/datastatistics1',
                     data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
@@ -128,24 +128,6 @@
                     })
                     .catch(function(err){});
             },
-            changeCount: function (device,account) {
-                let vm = this;
-                vm.$axios({
-                    method:'post',
-                    url:window.$g_Api + '/oa/device',
-                    data:{
-                            device:device,
-                            account:account,
-                            token:sessionStorage.getItem('token')
-                    }
-                })
-                   .then(function(res){
-                       if(res.data.code == 1){
-                           vm.$message.error('修改失败')
-                       }
-                   })
-                   .catch(function(err){});
-            }
         }
     }
 

@@ -6,6 +6,9 @@ const store = new Vuex.Store({
     state: {
         token:null,
         userName:null,
+        role:null,
+        auth:null,
+        uid:null,
     },
     getters: {},
     mutations: {
@@ -21,6 +24,15 @@ const store = new Vuex.Store({
         },
         setUserName: function (state,username) {
             state.userName = username;
+        },
+        setRole: function (state,role) {
+            state.role = role;
+        },
+        setAuth: function (state,auth) {
+            state.auth = auth;
+        },
+        setUid: function (state,uid) {
+            state.uid = uid;
         }
     },
     actions: {},

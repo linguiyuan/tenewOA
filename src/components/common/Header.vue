@@ -56,7 +56,7 @@
         },
         computed:{
             username(){
-                let username = this.$store.state.userName;
+                let username = sessionStorage.getItem('username');
                 return username ? username : this.name;
             }
         },

@@ -126,7 +126,7 @@
                 }
                 vm.$axios({
                     method:'post',
-                    url:window.$g_Api + '/oa/datastatistics',
+                    url:window.$g_Api + '/oa/datastatistics1',
                     data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
