@@ -11,7 +11,7 @@
                     style="width: 100%">
                     <el-table-column v-for='(value,key,index) in title' :key='index'
                                      highlight-current-row= true
-                                     :fixed='index<2?true:false'
+                                     :fixed='index<1?true:false'
                                      :label="value"
                                      :min-width="index==1?'180':'160'">
                         <template slot-scope="scope">
@@ -28,38 +28,6 @@
                 </el-table>
             </template>
         </div>
-        <!--<el-dialog-->
-            <!--title="新增用户"-->
-            <!--:visible.sync="dialogVisible"-->
-            <!--width="30%">-->
-            <!--<span>新备注:</span>-->
-            <!--<input type="text" v-model='addName'>-->
-            <!--<span slot="footer" class="dialog-footer">-->
-                <!--<el-button @click="dialogVisible = false">取 消</el-button>-->
-                <!--<el-button type="primary" @click="addNewName(addName)">确 定</el-button>-->
-            <!--</span>-->
-        <!--</el-dialog>-->
-        <!--<el-dialog-->
-            <!--title="修改数据"-->
-            <!--:visible.sync="dialogVisible1"-->
-            <!--width="30%">-->
-            <!--<p>-->
-                <!--<span>备注:</span>-->
-                <!--<span>{{reviseName}}</span>-->
-            <!--</p>-->
-            <!--<p style="margin: 15px 0;">-->
-                <!--<span>日期:</span>-->
-                <!--<span>{{reviseTime}}</span>-->
-            <!--</p>-->
-            <!--<p>-->
-                <!--<span>人数:</span>-->
-                <!--<input type="text" v-model='reviseNumber'>-->
-            <!--</p>-->
-            <!--<span slot="footer" class="dialog-footer">-->
-                <!--<el-button @click="dialogVisible1 = false">取 消</el-button>-->
-                <!--<el-button type="primary" @click="addNewName(reviseName,reviseTime,reviseNumber)">确 定</el-button>-->
-            <!--</span>-->
-        <!--</el-dialog>-->
     </div>
 </template>
 <script>
@@ -67,16 +35,14 @@
         name: 'oacustomer',
         data() {
             return {
+                token:sessionStorage.getItem('token'),
+                uid:sessionStorage.getItem('uid'),
                 title:null,
                 content:null,
                 propArr:[],
                 dialogVisible: false,
                 dialogVisible1: false,
                 at:null,
-                addName:null,
-                reviseName:null,
-                reviseTime:null,
-                reviseNumber:null,
             }
         },
         mounted: function () {
@@ -95,11 +61,11 @@
                     vm.at = nb;
                 }
                 if(!data){
-                    data = {token:sessionStorage.getItem('token')}
+                    data = {token:vm.token,uid:vm.uid}
                 }
                 vm.$axios({
                     method:'post',
-                    url:window.$g_Api + '/oa/customer',
+                    url:window.$g_Api + '/oa/oacustomer1',
                     data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
@@ -113,38 +79,6 @@
                     })
                     .catch(function(err){});
             },
-            addNewName: function (name,time,data) {
-                let vm = this;
-                vm.$axios({
-                    method:'post',
-                    url:window.$g_Api + '/oa/customerstatistics',
-                    data:vm.$qs.stringify({
-                        username:name,
-                        time:time,
-                        data:data,
-                        token:sessionStorage.getItem('token')
-                    })
-                })
-                   .then(function(res){
-                       if(res.data.code == 0){
-                           if(!time && !data){
-                               vm.dialogVisible = false;
-                           }else {
-                               vm.dialogVisible1 = false;
-                           }
-                           vm.getAxios()
-                       }else {
-                           vm.$message.error(res.data.message);
-                       }
-                   })
-                   .catch(function(err){});
-            },
-            reviseData: function (name,time,data) {
-                this.reviseName = name,
-                this.reviseTime = time,
-                this.reviseNumber = data,
-                this.dialogVisible1 = true;
-            }
         }
     }
 

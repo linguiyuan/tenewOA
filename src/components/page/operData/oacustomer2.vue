@@ -3,7 +3,9 @@
         <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：客户人数</p>
         <el-button type="primary" style="margin-bottom:10px" @click="dialogVisible = true">添加</el-button>
         <div class="my_table_box">
+            <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
             <template>
+                <el-checkbox-group v-model="checkedId" @change="handleCheckedCitiesChange">
                 <el-table
                     :data="content"
                     stripe
@@ -15,7 +17,7 @@
                                      :label="value"
                                      :min-width="index==1?'180':'160'">
                         <template slot-scope="scope">
-                            <span v-if="key == 't0'">{{scope.row[key]}}</span>
+                            <span v-if="key == 't0'"><el-checkbox :label="scope.row[key]">{{scope.row[key]}}</el-checkbox></span>
                             <span v-else style='display: block;width: 100%;height: 100%;' @click='reviseData(scope.row["t0"],title["t"+index],scope.row["t"+index])'>
                                 {{scope.row['t'+index]}}
                                 <sup
@@ -26,6 +28,7 @@
                         </template>
                     </el-table-column>
                 </el-table>
+                </el-checkbox-group>
             </template>
         </div>
         <el-dialog
@@ -67,6 +70,8 @@
         name: 'oacustomer',
         data() {
             return {
+                token:sessionStorage.getItem('token'),
+                uid:sessionStorage.getItem('uid'),
                 title:null,
                 content:null,
                 propArr:[],
@@ -77,6 +82,10 @@
                 reviseName:null,
                 reviseTime:null,
                 reviseNumber:null,
+                isIndeterminate: true,
+                checkAll:false,
+                checkAllId:[],
+                checkedId:[],
             }
         },
         mounted: function () {
@@ -95,23 +104,35 @@
                     vm.at = nb;
                 }
                 if(!data){
-                    data = {token:sessionStorage.getItem('token')}
+                    data = {token:vm.token,uid:vm.uid}
                 }
                 vm.$axios({
                     method:'post',
-                    url:window.$g_Api + '/oa/customer',
+                    url:window.$g_Api + '/oa/oacustomer1',
                     data:vm.$qs.stringify(data)
                 })
                     .then(function(res){
                         if(res.data.code == 0){
                             vm.content = res.data.data.content;
                             vm.title = res.data.data.title;
+                            for(let i = 0 ,len = vm.content.length ; i < len; i++){
+                                vm.checkAllId.push(vm.content[i]['t0']);
+                            }
                         }else {
                             vm.$message.error(res.data.message);
                         }
 
                     })
                     .catch(function(err){});
+            },
+            handleCheckAllChange: function (val) {
+                this.checkedId = val ? this.checkAllId : [];
+                this.isIndeterminate = false;
+            },
+            handleCheckedCitiesChange: function (value) {
+                let checkedCount = value.length;
+                this.checkAll = checkedCount === this.checkAllId.length;
+                this.isIndeterminate = checkedCount > 0 && checkedCount < this.checkAllId.length;
             },
             addNewName: function (name,time,data) {
                 let vm = this;
@@ -122,7 +143,8 @@
                         username:name,
                         time:time,
                         data:data,
-                        token:sessionStorage.getItem('token')
+                        token:vm.token,
+                        uid:vm.uid
                     })
                 })
                    .then(function(res){

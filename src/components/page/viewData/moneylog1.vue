@@ -52,7 +52,9 @@
             return {
                 queryTime:null,
                 result:null,
-                loading:false
+                loading:false,
+                token:sessionStorage.getItem('token'),
+                uid:sessionStorage.getItem('uid'),
             }
         },
         mounted: function () {
@@ -64,12 +66,12 @@
                 vm.loading = true;
                 vm.$axios({
                     method:'post',
-                    url:window.$g_Api+'/oa/record',
+                    url:window.$g_Api+'/oa/moneylog1',
                     data:vm.$qs.stringify({
-                        type:'payment_all',
                         start_time:time1,
                         end_time:time2,
-                        token:sessionStorage.getItem('token')
+                        token:vm.token,
+                        uid:vm.uid
                     })
                 })
                    .then(function(res){

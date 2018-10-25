@@ -97,7 +97,7 @@
                             {
                                 index: 'oacustomer2',
                                 title: '客户人数',
-                                power: power.customer2
+                                power: power.oacustomer2
                             },
                             {
                                 index: 'order2',

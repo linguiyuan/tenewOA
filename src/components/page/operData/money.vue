@@ -1,5 +1,5 @@
 <template>
-    <div id="money">
+    <div id="money" class='my_wap'>
         <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：新建转账</p>
         <div class="btn_box">
             <el-button type="primary" @click='open' style='height: 36px;margin-left: 10px;'>启动程序</el-button>
@@ -14,8 +14,36 @@
                 <el-button size="small" type="primary" :disabled='load'>点击上传</el-button>
             </el-upload>
         </div>
-        <div class="textbox">
+        <div class="textbox" v-show='progress'>
             <p v-for='(item,index) in websockData' :key='index'>{{item}}</p>
+        </div>
+        <div class="feedback_box" v-show='feedback'>
+            <table>
+                <thead>
+                    <tr>
+                        <th>payee_real_name</th>
+                        <th>payee_account</th>
+                        <th>pay_date</th>
+                        <th>order_id</th>
+                        <th>out_biz_no</th>
+                        <th>remark</th>
+                        <th>amount</th>
+                        <th>status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for='item in result' :key='item.order_id'>
+                        <td>{{item.payee_real_name}}</td>
+                        <td>{{item.payee_account}}</td>
+                        <td>{{item.pay_date}}</td>
+                        <td>{{item.order_id}}</td>
+                        <td>{{item.out_biz_no}}</td>
+                        <td>{{item.remark}}</td>
+                        <td>{{item.amount}}</td>
+                        <td>{{item.status}}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>
@@ -29,6 +57,11 @@
                 websockData:[],
                 url:window.$g_Api+'/oa/upload_excel',
                 load:true,
+                token:sessionStorage.getItem('token'),
+                uid:sessionStorage.getItem('uid'),
+                result:[],
+                progress:true,
+                feedback:false,
             }
         },
         created() {
@@ -45,6 +78,8 @@
                     type: 'warning',
                     center: true
                 }).then(() => {
+                    vm.progress=true;
+                    vm.feedback=false;
                     vm.initWebSocket();
                 }).catch(() => {
                     this.$message({
@@ -74,7 +109,6 @@
                 }else {
                     vm.$message.warning('您的浏览器版本不支持该功能请升级版本或更换浏览器!')
                 }
-
             },
             // websocketonopen(){ //连接建立之后执行send方法发送数据
             //     let actions = {"test":"12345"};
@@ -98,7 +132,6 @@
                     // window.open(window.$g_Api+"/oa/download_transfer_excel");
                     // this.openNew(window.$g_Api+"/oa/download_transfer_excel")
                     this.openNew(window.$g_Api+"/oa/download_transfer_excel")
-
                 }else {
                     this.websockData.push('程序出错,断开连接')
                 }
@@ -119,7 +152,7 @@
             pay: function (data) {
                 let vm = this;
                 if(!data){
-                    data = {token:sessionStorage.getItem('token')}
+                    data = {token:vm.token,uid:vm.uid}
                 }
                 vm.$axios({
                     method:'post',
@@ -127,9 +160,15 @@
                     data:vm.$qs.stringify(data)
                 })
                    .then(function(res){
-                       console.log(res.data);
+                       if(res.data.code == 0){
+                           vm.result = res.data.data;
+                           vm.progress=false;
+                           vm.feedback=true;
+                       }
                    })
-                   .catch(function(err){});
+                   .catch(function(err){
+                       console.error(err)
+                   });
             }
         },
         destroyed() {
@@ -141,6 +180,7 @@
 
 <style lang='scss'>
     #money{
+        min-height: 600px;
         background-color: #ffffff;
         .btn_box{
             display: flex;
@@ -158,6 +198,29 @@
             overflow-y: auto;
             padding: 10px;
             background-color: #ffffff;
+        }
+        .feedback_box{
+            width: 100%;
+            margin-top: 20px;
+            overflow-x: auto;
+            table{
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+                th,td{
+                    border-bottom: 1px solid #cccccc;
+                    padding-left: 10px;
+                    height: 28px;
+                    line-height: 28px;
+                }
+                tbody{
+                    tr{
+                        &:hover{
+                            background-color: rgba(204,204,204,0.2);
+                        }
+                    }
+                }
+            }
         }
     }
 

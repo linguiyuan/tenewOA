@@ -24,31 +24,6 @@
             </p>
         </div>
         <div class="my_table_box">
-            <!--<table class="my_table">-->
-                <!--<thead>-->
-                <!--<tr>-->
-                    <!--<th v-for='(item,index) in title' :key='index'>{{item}}</th>-->
-                <!--</tr>-->
-                <!--</thead>-->
-                <!--<tbody>-->
-                <!--<tr v-for='(value,index) in content' :key='index'>-->
-                    <!--<td v-for='(val,i) in value' :key='i'>{{val}}</td>-->
-                <!--</tr>-->
-                <!--</tbody>-->
-            <!--</table>-->
-            <!--<table class="my_table ps">-->
-                <!--<thead>-->
-                <!--<tr>-->
-                    <!--<th v-for='(item,index) in title' :key='index'>{{item}}</th>-->
-                <!--</tr>-->
-                <!--</thead>-->
-                <!--<tbody>-->
-                <!--<tr v-for='(value,index) in content' :key='index'>-->
-                    <!--<td>{{value[0]}}</td>-->
-                    <!--<td>{{value[1]}}</td>-->
-                <!--</tr>-->
-                <!--</tbody>-->
-            <!--</table>-->
             <template>
                 <el-table
                     :data="content"
@@ -67,7 +42,7 @@
                                 :disabled="true"
                                 v-model="scope.row[key]">
                             <span v-else-if="key == 't1'">{{scope.row[key] | getName}}</span>
-                            <span v-else >
+                            <span v-else class='tip_box' @mouseenter='getInfo(value,key,index)' @mouseleave='leave()'>
                                 {{scope.row['t'+index]}}
                                 <sup
                                     :class="(scope.row['t'+index]-scope.row['t'+(index+1)]>0?'sub1':'sub2')"
@@ -79,6 +54,44 @@
                 </el-table>
             </template>
         </div>
+        <div id="tip_content" v-show='ti'>
+            <div class="tip_header">
+                <p class="tip_title">
+                    <i></i>信息情况 微信号
+                    <span>Ua9876</span>
+                </p>
+                <p class="item">
+                    人数组:xxx小组 编号: 2
+                </p>
+            </div>
+            <div class="tip_content">
+                <div class="content_left">
+                    <p class="qiu">人数</p>
+                    <div class="number">
+                        <p>总人数</p>
+                        <p class="nb">56789</p>
+                    </div>
+                    <div class="increase">
+                        <p>比前日增长<span>124314</span><sup v-if='1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                        <p>比前7天增长<span>1234</span><sup v-if='1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                        <p>比前30天增长<span>14144</span><sup v-if='1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                    </div>
+                </div>
+                <div class="content_right">
+                    <p class="qiu">订单</p>
+                    <div class="number">
+                        <p>总订单</p>
+                        <p class="nb">56789</p>
+                    </div>
+                    <div class="increase">
+                        <p>昨日增长<span>-23423</span><sup v-if='-1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                        <p>7天增长<span>-234324</span><sup v-if='-1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                        <p>30天增长<span>-234324</span><sup v-if='-1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                        <p>平均订单数<span>-23432</span><sup v-if='-1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -87,12 +100,16 @@
         name: 'dashboard',
         data() {
             return {
+                token:sessionStorage.getItem('token'),
+                uid:sessionStorage.getItem('uid'),
                 queryTime:'',
                 title:null,
                 content:null,
                 propArr:[],
                 at:null,
                 loading:true,
+                ti:false,
+                info:{}
             }
         },
         mounted: function () {
@@ -100,7 +117,6 @@
         },
         computed:{
             data: function (key,the,last) {
-
             },
         },
         computed: {},
@@ -113,6 +129,37 @@
                     end_time:vm.queryTime[1]
                 })
             },
+            //鼠标移入显示提示框
+            getInfoBox: function (evnet) {
+                this.ti = true;
+                let e = evnet || window.event;
+                let scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+                let scrollLeft=document.documentElement.scrollLeft||document.body.scrollLeft;
+                this.x = e.pageX+scrollLeft;
+                this.y = e.pageY+scrollTop;
+                let the = document.getElementById('tip_content');
+                the.style.top = this.y+10+'px';
+                the.style.left = this.x+10+'px';
+            },
+            getInfo: function (value,key,index) {
+                let vm = this;
+                console.log(value, key, index);
+                vm.getInfoBox()
+
+            },
+            leave: function () {
+                this.ti = false;
+            },
+            getOacustomer: function () {
+              let vm = this;
+              vm.$axios({
+                  method:'post',
+                  url:window.$g_Api+'/oa/oacustomer1',
+                  data:{}
+              })
+                 .then(function(res){})
+                 .catch(function(err){});
+            },
             getAxios: function (data,nb) {
                 let vm = this;
                 vm.loading = true;
@@ -120,7 +167,10 @@
                     vm.at = nb;
                 }
                 if(!data){
-                    data = {token:sessionStorage.getItem('token')}
+                    data = {token:vm.token,uid:vm.uid}
+                }else {
+                    data.token = vm.token;
+                    data.uid = vm.uid;
                 }
                 vm.$axios({
                     method:'post',
@@ -209,6 +259,7 @@
             height: 100%;
             div.cell{
                 white-space:nowrap !important;
+                overflow: visible;
             }
             thead{
                 th{
@@ -227,6 +278,91 @@
                 border:none;
                 color: #606266;
                 font-size: 12px;
+            }
+            .tip_box{
+                display: inline-block;
+                width: 100%;
+                height: 100%;
+                &:hover{
+                    cursor:pointer;
+                }
+            }
+        }
+        #tip_content{
+            width: 600px;
+            height: 400px;
+            position: fixed;
+            left: 0;
+            top:0;
+            z-index: 999999;
+            background-color: #ffffff;
+            border:1px solid #cccccc;
+            padding: 8px;
+            .tip_header{
+                width: 100%;
+                height: 26px;
+                font-size: 16px;
+                line-height: 26px;
+                display: flex;
+                justify-content: space-between;
+                background-color:rgba(204,204,204,0.2);
+                .tip_title{
+                    display: flex;
+                    justify-content: flex-start;
+                    font-weight: bold;
+                    i{
+                        display: block;
+                        width: 3px;
+                        height: 100%;
+                        background-color: #409EFF;
+                        margin-right: 5px;
+                    }
+                    span{
+                        font-size: 14px;
+                        color: red;
+                        margin-left: 3px;
+                    }
+                }
+            }
+            .tip_content{
+                margin-top: 15px;
+                display: flex;
+                justify-content: space-between;
+                font-size: 14px;
+                color: #666666;
+                .content_left,.content_right{
+                    height: 80px;
+                    display: flex;
+                    justify-content: flex-start;
+                    padding: 15px;
+                    .qiu{
+                        width: 50px;
+                        height: 50px;
+                        border-radius:50%;
+                        background-color: #409EFF;
+                        color: #ffffff;
+                        text-align: center;
+                        line-height: 50px;
+                        font-size: 20px;
+                        margin-right: 10px;
+                        margin-top: 15px;
+                    }
+                    .number,.increase{
+                        height: 100%;
+                        font-size: 12px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: flex-start;
+                        line-height: 20px;
+                    }
+                    .increase{
+                        margin-left: 15px;
+                        span{
+                            margin-left: 8px;
+                            margin-right: 4px;
+                        }
+                    }
+                }
             }
         }
     }

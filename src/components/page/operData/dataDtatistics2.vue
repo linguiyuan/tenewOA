@@ -95,7 +95,9 @@
                 queryTime:'',
                 content:null,
                 at:'',
-                loading:true
+                loading:true,
+                token:sessionStorage.getItem('token'),
+                uid:sessionStorage.getItem('uid')
             }
         },
         mounted: function () {
@@ -109,7 +111,8 @@
                 vm.getAxios({
                     start_time:vm.queryTime[0],
                     end_time:vm.queryTime[1],
-                    token:sessionStorage.getItem('token')
+                    token:vm.token,
+                    uid:vm.uid
                 })
             },
             getAxios: function (data,nb) {
@@ -120,9 +123,13 @@
                     vm.at = nb;
                 }
                 if(!data){
-                    data = {token:sessionStorage.getItem('token')}
+                    data = {
+                        token:vm.token,
+                        uid:vm.uid
+                        }
                 }else if(!data.token){
-                    data.token = sessionStorage.getItem('token')
+                    data.token = vm.token;
+                    data.uid = vm.uid
                 }
                 vm.$axios({
                     method:'post',
@@ -143,7 +150,8 @@
                     data:{
                             device:device,
                             account:account,
-                            token:sessionStorage.getItem('token')
+                            token:vm.token,
+                            uid:vm.uid
                     }
                 })
                    .then(function(res){

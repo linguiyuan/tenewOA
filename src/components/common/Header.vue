@@ -64,7 +64,9 @@
             // 用户名下拉菜单选择事件
             handleCommand(command) {
                 if(command == 'loginout'){
-                    this.$store.commit('logoutToken');
+                    sessionStorage.setItem('token','');
+                    sessionStorage.setItem('uid','');
+                    sessionStorage.setItem('power','');
                     this.$router.push('/login');
                 }
             },
