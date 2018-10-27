@@ -2,19 +2,29 @@
     <div id="moneylog">
         <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：数据统计 > 转账记录</p>
         <div class="da_header">
-            <p>查询时间：</p>
-            <el-date-picker
-                v-model="queryTime "
-                type="daterange"
-                align="left"
-                unlink-panels
-                format="yyyy 年 MM 月 dd 日"
-                value-format="yyyy-MM-dd"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期">
-            </el-date-picker>
-            <el-button type="primary" style='margin-left: 15px;' @click='getData(queryTime[0],queryTime[1])'>点击搜索</el-button>
+            <div class="header_l">
+                <p>查询时间：</p>
+                <el-date-picker
+                    v-model="queryTime "
+                    type="daterange"
+                    align="left"
+                    unlink-panels
+                    format="yyyy 年 MM 月 dd 日"
+                    value-format="yyyy-MM-dd"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期">
+                </el-date-picker>
+                <el-button type="primary" style='margin: 0px 20px;' @click='getData(queryTime[0],queryTime[1])'>点击搜索</el-button>
+                <template>
+                    <el-radio-group v-model="radio" style='margin-top: 10px !important;'>
+                        <el-radio :label="'payment_all'">全部</el-radio>
+                        <el-radio :label="'payment_succ'">成功</el-radio>
+                        <el-radio :label="'payment_fail'">失败</el-radio>
+                    </el-radio-group>
+                </template>
+            </div>
+            <el-button type="warning" @click='export2Excel'>导出excel表格</el-button>
         </div>
         <div class="logBox">
             <table class='logtable' v-if='result' v-loading='loading'>
@@ -55,6 +65,7 @@
                 loading:false,
                 token:sessionStorage.getItem('token'),
                 uid:sessionStorage.getItem('uid'),
+                radio:'payment_all'
             }
         },
         mounted: function () {
@@ -71,7 +82,8 @@
                         start_time:time1,
                         end_time:time2,
                         token:vm.token,
-                        uid:vm.uid
+                        uid:vm.uid,
+                        type:vm.radio
                     })
                 })
                    .then(function(res){
@@ -83,6 +95,24 @@
                        }
                    })
                    .catch(function(err){});
+            },
+            export2Excel() {
+                if(this.result){
+                    require.ensure([], () => {
+                        const { export_json_to_excel } = require('@/vendor/Export2Excel');
+                        const tHeader = ['姓名', '账户', '设备信息', '交易编号','金额', '交易状态']; //对应表格输出的title
+                        const filterVal = ['name', 'account', 'remark', 'out_biz_no','amount', 'status']; // 对应表格输出的数据
+                        const list = this.result;
+                        const data = this.formatJson(filterVal, list);
+                        export_json_to_excel(tHeader, data, '列表excel'); //对应下载文件的名字
+                    })
+                }else {
+                    return false
+                }
+
+            },
+            formatJson(filterVal,jsonData) {
+                return jsonData.map(v => filterVal.map(j => v[j]))
             }
         }
     }
@@ -123,11 +153,18 @@
             }
         }
         .da_header{
+            width: 100%;
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
+            padding: 0 10px;
             height: 32px;
             line-height: 32px;
             margin-bottom: 20px;
+            .header_l{
+                display: flex;
+                justify-content: flex-start;
+                line-height: 32px;
+            }
         }
     }
 </style>

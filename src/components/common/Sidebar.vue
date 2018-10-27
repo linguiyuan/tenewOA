@@ -84,16 +84,16 @@
                         index: '3',
                         title: '数据管理',
                         subs: [
-                            {
-                                index: 'datastatistics2',
-                                title: '实时数据',
-                                power: power.datastatistics2
-                            },
-                            {
-                                index: 'daydata2',
-                                title: '每日数据',
-                                power: power.daydata2
-                            },
+                            // {
+                            //     index: 'datastatistics2',
+                            //     title: '实时数据',
+                            //     power: power.datastatistics2
+                            // },
+                            // {
+                            //     index: 'daydata2',
+                            //     title: '每日数据',
+                            //     power: power.daydata2
+                            // },
                             {
                                 index: 'oacustomer2',
                                 title: '客户人数',
@@ -113,7 +113,7 @@
                             },
                             {
                                 index: 'profits2',
-                                title: '股东收益',
+                                title: '股东管理',
                                 power: power.profits2
 
                             },

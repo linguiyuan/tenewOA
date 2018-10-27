@@ -6,7 +6,7 @@
             </el-breadcrumb>
         </div>
         <div class="container wap">
-            <el-button type="primary" @click='changeBox(1)'>+新增用户</el-button>
+            <el-button type="primary" @click='changeBox("1")'>+新增用户</el-button>
             <div class="userlist_box">
                 <table>
                     <thead>
@@ -23,8 +23,8 @@
                         <td>{{item.username}}</td>
                         <td>{{item.password}}</td>
                         <td>{{item.group}}</td>
-                        <td><el-button type="primary" @click='changeBox(2,item.id)'>查看修改</el-button></td>
-                        <td><el-button type="danger" @click='del(item.id)'>删除用户</el-button></td>
+                        <td><el-button type="primary" @click='changeBox("2",item.id)'>查看修改</el-button></td>
+                        <td><el-button type="danger" @click="open2(item.id)">删除用户</el-button></td>
                     </tr>
                     </tbody>
                 </table>
@@ -55,8 +55,8 @@
                         <el-checkbox v-model="power.profits1">股东收益(可视)</el-checkbox>
                         <el-checkbox v-model="power.moneylog1">转账记录(可视)</el-checkbox>
                         <el-checkbox v-model="power.devices1">设备管理(可视)</el-checkbox>
-                        <el-checkbox v-model="power.datastatistics2">实时数据(操作)</el-checkbox>
-                        <el-checkbox v-model="power.daydata2">每日数据(操作)</el-checkbox>
+                        <!--<el-checkbox v-model="power.datastatistics2">实时数据(操作)</el-checkbox>-->
+                        <!--<el-checkbox v-model="power.daydata2">每日数据(操作)</el-checkbox>-->
                         <el-checkbox v-model="power.oacustomer2">客户人数(操作)</el-checkbox>
                         <el-checkbox v-model="power.order2">订单比(操作)</el-checkbox>
                         <el-checkbox v-model="power.achievement2">员工绩效(操作)</el-checkbox>
@@ -89,24 +89,24 @@
                 username:null,
                 password:null,
                 power: {
-                    datastatistics1: false,//实时数据
-                    daydata1: false,//每日数据
-                    oacustomer1: false,//客户人数
-                    order1: false,//订单比
-                    achievement1: false,//员工绩效
-                    profits1: false,//股东收益
-                    moneylog1: false,//转账记录
-                    devices1: false,//设备管理
-                    datastatistics2: false,//实时数据
-                    daydata2: false,//每日数据
-                    oacustomer2: false,//客户人数
-                    order2: false,//订单比
-                    achievement2: false,//员工绩效
-                    profits2: false,//股东收益
-                    money: false,//新建转账
-                    devices2: false,//设备管理
-                    manage: false,//权限管理
-                    operationlog: false,//操作日志
+                    // datastatistics1: false,//实时数据
+                    // daydata1: false,//每日数据
+                    // oacustomer1: false,//客户人数
+                    // order1: false,//订单比
+                    // achievement1: false,//员工绩效
+                    // profits1: false,//股东收益
+                    // moneylog1: false,//转账记录
+                    // devices1: false,//设备管理
+                    // datastatistics2: false,//实时数据
+                    // daydata2: false,//每日数据
+                    // oacustomer2: false,//客户人数
+                    // order2: false,//订单比
+                    // achievement2: false,//员工绩效
+                    // profits2: false,//股东收益
+                    // money: false,//新建转账
+                    // devices2: false,//设备管理
+                    // manage: false,//权限管理
+                    // operationlog: false,//操作日志
                 },
                 t1:true,
                 id:null
@@ -120,9 +120,12 @@
             changeBox: function (type,id) {
                 let vm = this;
                 let url;
+                vm.username='';
+                vm.password='';
                 vm.id = null;
-                if(type == 1){
-                    vm.power = []
+                if(type == '1'){
+                    vm.username='';
+                    vm.password='';
                     vm.t1 = true;
                     vm.title = '新增用户'
                 }else if(type == 2){
@@ -158,7 +161,7 @@
             },
             reviseUser: function () {
                 let vm = this;
-                let url = window.$g_Api+'/manage/update_user_info'
+                let url = window.$g_Api+'/oa/manage/update_user_info'
                 let data = vm.$qs.stringify({
                     token:vm.token,
                     uid:vm.uid,
@@ -182,20 +185,23 @@
                 })
                     .then(function(res){
                         if(res.data.code == 0){
-                            vm.$message.success(resultMessage)
+                            vm.$message.success(resultMessage);
+                            vm.getuserlist();
+                            vm.dialogVisible = false;
+                            vm.power = {};
                         }else {
                             vm.$message.error(res.data.message)
                         }
                     })
                     .catch(function(err){
-                        console.error(err);
+                        vm.$message.error(err)
                     });
             },
             del: function (id) {
                 let vm = this;
                 vm.$axios({
                     method:'post',
-                    url:window.$g_Api+'/manage/remove_user',
+                    url:window.$g_Api+'/oa/manage/remove_user',
                     data:vm.$qs.stringify({
                         token:vm.token,
                         uid:vm.uid,
@@ -208,7 +214,25 @@
                            vm.getuserlist();
                        }
                    })
-                   .catch(function(err){});
+                   .catch(function(err){vm.$message.error(err)});
+            },
+            open2: function (id) {
+                this.$confirm('此操作将删除该用户, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.del(id);
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
             },
             getuserlist: function () {
                 let vm = this;

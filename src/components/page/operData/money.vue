@@ -6,42 +6,73 @@
             <!--<el-button type="primary" @click=initWebSocket>上传文件</el-button>-->
             <el-upload
                 class="upload-demo"
-                style='border:none; height:60px;display: flex;justify-content: flex-start;'
                 :action='url'
-                :on-success='uploadFile'
+                ref="upload"
+                :multiple='false'
                 :on-error='error'
-                name='payment'>
-                <el-button size="small" type="primary" :disabled='load'>点击上传</el-button>
+                name='payment'
+                :limit=1
+                :on-change='changefile'
+                :on-exceed='exceed'
+                :on-success='uploadFile'
+                :auto-upload="false">
+                <el-button size="small" slot="trigger" type="primary" style='height: 36px;'>选择文件</el-button>
+                <el-button size="small" type="success" style='height: 36px;margin: 0px 30px;' @click='submitUpload' v-loading='up'>
+                    上传到服务器
+                </el-button>
             </el-upload>
+            <el-button type="primary" @click='pay' style='height: 36px;margin-left: 10px; overflow: hidden' v-loading='transfer'element-loading-text="转账中"
+                       element-loading-spinner="el-icon-loading"
+                       element-loading-background="rgba(0, 0, 0, 0.8)">开始转账</el-button>
         </div>
-        <div class="textbox" v-show='progress'>
+        <div class="textbox" v-show='preview == 1?true:false'>
             <p v-for='(item,index) in websockData' :key='index'>{{item}}</p>
         </div>
-        <div class="feedback_box" v-show='feedback'>
+        <div class="feedback_box">
+            <p class="allmoney" v-show='preview == 2?true:false'>
+                总订单数:<span style='color:red;margin: 0 8px;'>{{allorder}}</span>
+                总订金额:<span style='color:red;margin: 0 8px;'>{{allmoney}}</span>
+            </p>
             <table>
                 <thead>
-                    <tr>
-                        <th>payee_real_name</th>
-                        <th>payee_account</th>
-                        <th>pay_date</th>
-                        <th>order_id</th>
-                        <th>out_biz_no</th>
-                        <th>remark</th>
-                        <th>amount</th>
-                        <th>status</th>
-                    </tr>
+                <tr v-if='preview == 3'>
+                    <th>姓名</th>
+                    <th>账号</th>
+                    <th>日期</th>
+                    <th>订单号</th>
+                    <th>编码</th>
+                    <th>设备信息</th>
+                    <th>金额</th>
+                    <th>状态</th>
+                </tr>
+                <tr v-else-if='preview == 2'>
+                    <th>金额</th>
+                    <th>账号</th>
+                    <th>备注</th>
+                    <th>名字</th>
+                    <th>设备号</th>
+                </tr>
                 </thead>
-                <tbody>
-                    <tr v-for='item in result' :key='item.order_id'>
-                        <td>{{item.payee_real_name}}</td>
-                        <td>{{item.payee_account}}</td>
-                        <td>{{item.pay_date}}</td>
-                        <td>{{item.order_id}}</td>
-                        <td>{{item.out_biz_no}}</td>
-                        <td>{{item.remark}}</td>
-                        <td>{{item.amount}}</td>
-                        <td>{{item.status}}</td>
-                    </tr>
+                <tbody v-if='preview == 3'>
+                <tr v-for='item in resultlist' :key='item.order_id'>
+                    <td>{{item.payee_real_name}}</td>
+                    <td>{{item.payee_account}}</td>
+                    <td>{{item.pay_date}}</td>
+                    <td>{{item.order_id}}</td>
+                    <td>{{item.out_biz_no}}</td>
+                    <td>{{item.remark}}</td>
+                    <td>{{item.amount}}</td>
+                    <td>{{item.status}}</td>
+                </tr>
+                </tbody>
+                <tbody v-else-if='preview == 2'>
+                <tr v-for='item in outdata' :key='item["账号"]'>
+                    <td>{{item['金额']}}</td>
+                    <td>{{item['账号']}}</td>
+                    <td>{{item['备注']}}</td>
+                    <td>{{item['名字']}}</td>
+                    <td>{{item['设备号']}}</td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -54,22 +85,32 @@
         data() {
             return {
                 websock: null,
-                websockData:[],
-                url:window.$g_Api+'/oa/upload_excel',
-                load:true,
-                token:sessionStorage.getItem('token'),
-                uid:sessionStorage.getItem('uid'),
-                result:[],
-                progress:true,
-                feedback:false,
+                websockData: [],
+                url: window.$g_Api + '/oa/upload_excel',
+                load: true,
+                token: sessionStorage.getItem('token'),
+                uid: sessionStorage.getItem('uid'),
+                resultlist: null,
+                outdata:null,
+                preview:1,
+                allorder:null,
+                allmoney:null,
+                up:false,
+                transfer:false
             }
         },
         created() {
         },
-        computed: {
-        },
+        computed: {},
         methods: {
             //确定启动程序提示对话框
+            accAdd: function (arg1,arg2) {
+                    var r1,r2,m;
+                    try{r1=arg1.toString().split(".")[1].length}catch(e){r1=0}
+                    try{r2=arg2.toString().split(".")[1].length}catch(e){r2=0}
+                    m=Math.pow(10,Math.max(r1,r2))
+                    return (arg1*m+arg2*m)/m
+            },
             open() {
                 let vm = this;
                 vm.$confirm('即将启动程序, 是否继续?', '提示', {
@@ -78,8 +119,8 @@
                     type: 'warning',
                     center: true
                 }).then(() => {
-                    vm.progress=true;
-                    vm.feedback=false;
+                    vm.progress = true;
+                    vm.feedback = false;
                     vm.initWebSocket();
                 }).catch(() => {
                     this.$message({
@@ -88,7 +129,7 @@
                     });
                 });
             },
-            openNew:function (url) {
+            openNew: function (url) {
                 let a = document.createElement("a"); //创建a对象
                 a.setAttribute("href", url);
                 a.setAttribute("target", "_blank");
@@ -96,80 +137,146 @@
                 document.body.appendChild(a);
                 a.click(); //执行当前对象
             },
-            initWebSocket(){
+            initWebSocket() {
                 //初始化weosocket
+                this.preview = 1;
                 this.websockData = ['程序启动中......'];
                 if ("WebSocket" in window) {
-                    const wsuri = "ws://"+window.$g_Api2+"/oa/exec_each_machines";
+                    const wsuri = "ws://" + window.$g_Api2 + "/oa/exec_each_machines";
                     this.websock = new WebSocket(wsuri);
                     this.websock.onmessage = this.websocketonmessage;
                     this.websock.onopen = this.websocketonopen;
                     // this.websock.onerror = this.websocketonerror;
                     this.websock.onclose = this.websocketclose;
-                }else {
+                } else {
                     vm.$message.warning('您的浏览器版本不支持该功能请升级版本或更换浏览器!')
                 }
             },
-            // websocketonopen(){ //连接建立之后执行send方法发送数据
-            //     let actions = {"test":"12345"};
-            //     this.websocketsend(JSON.stringify(actions));
-            // },
-            websocketonerror(){//连接建立失败重连
+            websocketonerror() {//连接建立失败重连
                 this.initWebSocket();
             },
-            websocketonmessage(e){ //数据接收
+            websocketonmessage(e) { //数据接收
                 this.websockData.push(this.$qs.parse(e.data));
             },
-            websocketsend(Data){//数据发送
+            websocketsend(Data) {//数据发送
                 this.websock.send(Data);
             },
-            websocketclose(e){  //关闭
-                if(this.websock.readyState == 3 && !!this.websock){
+            websocketclose(e) {  //关闭
+                if (this.websock.readyState == 3 && !!this.websock) {
                     this.websockData.push('执行完毕,断开连接')
                     this.load = false;
                     // window.location.href =window.$g_Api+"/oa/download_transfer_excel"
                     // window.location.href ="http://www.baidu.com"
                     // window.open(window.$g_Api+"/oa/download_transfer_excel");
                     // this.openNew(window.$g_Api+"/oa/download_transfer_excel")
-                    this.openNew(window.$g_Api+"/oa/download_transfer_excel")
-                }else {
+                    this.openNew(window.$g_Api + "/oa/download_transfer_excel")
+                } else {
                     this.websockData.push('程序出错,断开连接')
                 }
             },
             uploadFile: function (response, file, fileList) {
-                if(response.code == 0){
-                    this.$message.success('上传成功')
-                    this.pay();
-                }else {
-                    this.$message.error(response.message)
+                this.up = false;
+                if (response.code == 0) {
+                    this.$message.success('上传成功');
+                } else {
+                    alert(response.message);
                 }
 
+            },
+            exceed: function (files, fileList) {
+                this.$message.warning('超出文件个数')
             },
             error: function (err, file, fileList) {
                 console.log(err);
                 this.$message.error(err.message)
             },
+            submitUpload() {
+                this.up = true;
+                this.$refs.upload.submit();
+            },
+            changefile: function (file, fileList) {
+                this.preview = 2;
+                if (file.name.split('.')[1] != 'xls' && file.name.split('.')[1] != 'xlsx') {
+                    this.$message({message: '上传文件格式错误，请上传xls、xlsx文件！', type: 'warning'});
+                } else {
+                    let _this = this;
+                    let inputDOM = this.$refs.inputer;
+// 通过DOM取文件数据
+
+                    this.file = event.currentTarget.files[0];
+
+                    let rABS = false; //是否将文件读取为二进制字符串
+                    let f = this.file;
+
+                    let reader = new FileReader();
+//if (!FileReader.prototype.readAsBinaryString) {
+                    FileReader.prototype.readAsBinaryString = function (f) {
+                        let binary = "";
+                        let rABS = false; //是否将文件读取为二进制字符串
+                        let wb; //读取完成的数据
+                        let reader = new FileReader();
+                        reader.onload = function (e) {
+                            let bytes = new Uint8Array(reader.result);
+                            let length = bytes.byteLength;
+                            for (let i = 0; i < length; i++) {
+                                binary += String.fromCharCode(bytes[i]);
+                            }
+                            let XLSX = require('xlsx');
+                            if (rABS) {
+                                wb = XLSX.read(btoa(fixdata(binary)), { //手动转化
+                                    type: 'base64'
+                                });
+                            } else {
+                                wb = XLSX.read(binary, {
+                                    type: 'binary'
+                                });
+                            }
+                            let outdata = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);//outdata就是你想要的东西
+                            let money = 0;
+                            for(let i = 0 ,len = outdata.length ; i < len; i++){
+                                money = _this.accAdd(money,outdata[i]['金额']);
+                            }
+                            _this.allmoney = money;
+                            _this.outdata = outdata;
+                            _this.allorder = outdata.length;
+                        }
+                        reader.readAsArrayBuffer(f);
+                    }
+                    if (rABS) {
+                        reader.readAsArrayBuffer(f);
+                    } else {
+                        reader.readAsBinaryString(f);
+                    }
+                }
+            },
             pay: function (data) {
                 let vm = this;
-                if(!data){
-                    data = {token:vm.token,uid:vm.uid}
+                vm.transfer = true;
+                if (!data) {
+                    data = {token: vm.token, uid: vm.uid}
                 }
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api+'/oa/money',
-                    data:vm.$qs.stringify(data)
+                    method: 'post',
+                    url: window.$g_Api + '/oa/money',
+                    data: vm.$qs.stringify(data)
                 })
-                   .then(function(res){
-                       if(res.data.code == 0){
-                           vm.result = res.data.data;
-                           vm.progress=false;
-                           vm.feedback=true;
-                       }
-                   })
-                   .catch(function(err){
-                       console.error(err)
-                   });
-            }
+                    .then(function (res) {
+                        vm.transfer = false;
+                        if (res.data.code == 0 && !!res.data.data) {
+                            vm.$notify({
+                                title: '提示',
+                                message: '转账成功',
+                                duration: 0
+                            });
+                            vm.preview = 3
+                            vm.resultlist = res.data.data;
+                        }
+                    })
+                    .catch(function (err) {
+                        vm.transfer = false;
+                        alert(err);
+                    });
+            },
         },
         destroyed() {
             this.websock.onclose() //离开路由之后断开websocket连接
@@ -179,44 +286,60 @@
 </script>
 
 <style lang='scss'>
-    #money{
+    #money {
         min-height: 600px;
         background-color: #ffffff;
-        .btn_box{
+        .btn_box {
             display: flex;
             justify-content: flex-start;
-            .upload-demo{
-                .el-upload--text{
+            .upload-demo {
+                width: 600px;
+                margin: 0px 50px;
+                display: flex;
+                justify-content: flex-start;
+                .el-upload--text {
                     border: none;
-                    height: 60px;
+                    height: 36px;
+                    width: 80px;
                 }
             }
         }
-        .textbox{
+        .textbox {
             width: 100%;
             height: 520px;
             overflow-y: auto;
             padding: 10px;
             background-color: #ffffff;
         }
-        .feedback_box{
+        .feedback_box {
             width: 100%;
             margin-top: 20px;
             overflow-x: auto;
-            table{
+            table {
                 width: 100%;
                 border-collapse: collapse;
                 text-align: left;
-                th,td{
-                    border-bottom: 1px solid #cccccc;
+                margin-top: 15px;
+                thead{
+                    tr{
+                        background-color: rgba(64,158,255,.7);
+                        color: #ffffff;
+                    }
+                }
+                th, td {
+                    /*border-bottom: 1px solid #cccccc;*/
                     padding-left: 10px;
                     height: 28px;
                     line-height: 28px;
                 }
-                tbody{
-                    tr{
-                        &:hover{
-                            background-color: rgba(204,204,204,0.2);
+                tbody {
+                    tr {
+                        &:nth-child(2n){
+                            background-color: rgba(64,158,255,.15);
+                        }
+                        &:hover {
+                            background-color: rgba(204, 204, 204, 0.2);
+                            cursor: pointer;
                         }
                     }
                 }
