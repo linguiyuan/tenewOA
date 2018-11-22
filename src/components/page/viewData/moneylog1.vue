@@ -1,5 +1,5 @@
 <template>
-    <div id="moneylog">
+    <div id="moneylog" class='my_wap'>
         <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：数据统计 > 转账记录</p>
         <div class="da_header">
             <div class="header_l">
@@ -31,21 +31,21 @@
                 <thead>
                 <tr>
                     <th>金额</th>
-                    <th>账户</th>
-                    <th>姓名</th>
-                    <th>交易编号</th>
-                    <th>设备信息</th>
+                    <th>账号</th>
                     <th>交易转态</th>
+                    <th>姓名</th>
+                    <th>设备信息</th>
+                    <th>交易编号</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr v-for='(data,index) in result' :key='index' :class='{"error":data.status=="转账成功"?false:true}'>
                     <td>{{data.amount}}</td>
                     <td>{{data.account}}</td>
-                    <td>{{data.name}}</td>
-                    <td>{{data.out_biz_no}}</td>
-                    <td>{{data.remark}}</td>
                     <td>{{data.status}}</td>
+                    <td>{{data.name}}</td>
+                    <td>{{data.remark}}</td>
+                    <td>{{data.out_biz_no}}</td>
                 </tr>
                 </tbody>
             </table>
@@ -78,13 +78,13 @@
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api+'/oa/moneylog1',
-                    data:vm.$qs.stringify({
+                    data:{
                         start_time:time1,
                         end_time:time2,
                         token:vm.token,
                         uid:vm.uid,
                         type:vm.radio
-                    })
+                    }
                 })
                    .then(function(res){
                        vm.loading = false;
@@ -100,8 +100,8 @@
                 if(this.result){
                     require.ensure([], () => {
                         const { export_json_to_excel } = require('@/vendor/Export2Excel');
-                        const tHeader = ['姓名', '账户', '设备信息', '交易编号','金额', '交易状态']; //对应表格输出的title
-                        const filterVal = ['name', 'account', 'remark', 'out_biz_no','amount', 'status']; // 对应表格输出的数据
+                        const tHeader = ['金额', '账号', '交易状态', '姓名','设备信息', '交易编号']; //对应表格输出的title
+                        const filterVal = ['amount', 'account', 'status', 'name','remark', 'out_biz_no']; // 对应表格输出的数据
                         const list = this.result;
                         const data = this.formatJson(filterVal, list);
                         export_json_to_excel(tHeader, data, '列表excel'); //对应下载文件的名字
@@ -128,14 +128,15 @@
         white-space:nowrap;
         }
         .logBox{
+            width: 100%;
             background-color: #ffffff;
             padding: 10px;
             border-radius:20px;
-            min-height: 600px;
+            height: 80%;
+            overflow-y: auto;
         }
         .logtable{
-            min-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
             margin-top: 20px;
             th,td{
                 padding: 0px 6px;

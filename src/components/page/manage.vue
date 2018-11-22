@@ -1,5 +1,5 @@
 <template>
-    <div id="manage">
+    <div id="manage" class='my_wap'>
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item><i class="el-icon-warning"></i>权限管理</el-breadcrumb-item>
@@ -11,15 +11,17 @@
                 <table>
                     <thead>
                     <tr>
+                        <th>真实姓名</th>
                         <th>用户名</th>
                         <th>密码</th>
-                        <th>小组类型</th>
+                        <th>类型</th>
                         <th>操作</th>
                         <th>操作</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr v-for='item in userlist' :key='item.id'>
+                        <td>{{item.real_name}}</td>
                         <td>{{item.username}}</td>
                         <td>{{item.password}}</td>
                         <td>{{item.group}}</td>
@@ -34,12 +36,23 @@
             :title="title"
             :visible.sync="dialogVisible"
             width="40%">
-            <div class='addUserBox'>
+            <div class='addUserBox' v-loading='loading'>
+                <template>
+                    <el-radio-group v-model="userType" style='margin-top: -40px;'>
+                        <el-radio label="客服">客服</el-radio>
+                        <el-radio label="股东">股东</el-radio>
+                        <el-radio label="合伙人">合伙人</el-radio>
+                        <el-radio label="管理员">管理员</el-radio>
+                    </el-radio-group>
+                </template>
                 <p>
-                    <span style='display: inline-block;width: 80%;'>设置用户名:</span>
+                    <span style='display: inline-block;width: 80px;'>真实姓名:</span>
+                    <input type="text" v-model='real_name'>
+                    <br>
+                    <span style='display: inline-block; margin-top: 8px;width: 80px;'>设置用户名:</span>
                     <input type="text" v-model='username'>
                     <br>
-                    <span style='display: inline-block;width: 80%; margin-top: 8px;'>设置密码:</span>
+                    <span style='display: inline-block; margin-top: 8px;width: 80px;'>设置密码:</span>
                     <input type="text" v-model='password'>
                 </p>
                 <p>
@@ -55,16 +68,17 @@
                         <el-checkbox v-model="power.profits1">股东收益(可视)</el-checkbox>
                         <el-checkbox v-model="power.moneylog1">转账记录(可视)</el-checkbox>
                         <el-checkbox v-model="power.devices1">设备管理(可视)</el-checkbox>
-                        <!--<el-checkbox v-model="power.datastatistics2">实时数据(操作)</el-checkbox>-->
-                        <!--<el-checkbox v-model="power.daydata2">每日数据(操作)</el-checkbox>-->
+                        <el-checkbox v-model="power.groupdata">分组数据(可视)</el-checkbox>
                         <el-checkbox v-model="power.oacustomer2">客户人数(操作)</el-checkbox>
-                        <el-checkbox v-model="power.order2">订单比(操作)</el-checkbox>
                         <el-checkbox v-model="power.achievement2">员工绩效(操作)</el-checkbox>
                         <el-checkbox v-model="power.profits2">股东收益(操作)</el-checkbox>
                         <el-checkbox v-model="power.money">新建转账(操作)</el-checkbox>
                         <el-checkbox v-model="power.devices2">设备管理(操作)</el-checkbox>
-                        <el-checkbox v-model="power.manage">权限管理(操作)</el-checkbox>
+                        <el-checkbox v-model="power.manage">用户管理(操作)</el-checkbox>
                         <el-checkbox v-model="power.operationlog">操作日志(操作)</el-checkbox>
+                        <el-checkbox v-model="power.groupmanagement">分组管理(操作)</el-checkbox>
+                        <el-checkbox v-model="power.order2">订单比(操作)</el-checkbox>
+                        <el-checkbox v-model="power.check_order">订单比(操作)</el-checkbox>
                     </template>
                 </p>
             </div>
@@ -88,6 +102,9 @@
                 userlist:[],
                 username:null,
                 password:null,
+                real_name:null,
+                userType:'客服',
+                loading:false,
                 power: {
                     // datastatistics1: false,//实时数据
                     // daydata1: false,//每日数据
@@ -124,6 +141,29 @@
                 vm.password='';
                 vm.id = null;
                 if(type == '1'){
+                    vm.power ={
+                        datastatistics1: false,//实时数据
+                        daydata1: false,//每日数据
+                        oacustomer1: false,//客户人数
+                        order1: false,//订单比
+                        achievement1: false,//员工绩效
+                        profits1: false,//股东收益
+                        moneylog1: false,//转账记录
+                        devices1: false,//设备管理
+                        datastatistics2: false,//实时数据
+                        daydata2: false,//每日数据
+                        oacustomer2: false,//客户人数
+                        order2: false,//订单比
+                        achievement2: false,//员工绩效
+                        profits2: false,//股东收益
+                        money: false,//新建转账
+                        devices2: false,//设备管理
+                        manage: false,//权限管理
+                        operationlog: false,//操作日志
+                        check_order: false,//操作日志
+                        groupdata: false,//操作日志
+                        groupmanagement: false,//操作日志
+                    }
                     vm.username='';
                     vm.password='';
                     vm.t1 = true;
@@ -144,32 +184,39 @@
                     vm.power = vm.userlist[ac].auth;
                     vm.password = vm.userlist[ac].password;
                     vm.username = vm.userlist[ac].username;
+                    vm.real_name = vm.userlist[ac].real_name;
+                    vm.userType = vm.userlist[ac].group;
                 }
                 this.dialogVisible = true;
             },
             setUser: function () {
                 let vm = this;
+                console.log(vm.userType);
                 let url = window.$g_Api+'/oa/manage/edituser';
-                let data = vm.$qs.stringify({
-                    token:vm.token,
-                    uid:vm.uid,
-                    username:vm.username,
-                    password:vm.password,
-                    power:vm.power
-                })
-                vm.userApi(url,data,'新增用户成功');
-            },
-            reviseUser: function () {
-                let vm = this;
-                let url = window.$g_Api+'/oa/manage/update_user_info'
-                let data = vm.$qs.stringify({
+                let data = {
                     token:vm.token,
                     uid:vm.uid,
                     username:vm.username,
                     password:vm.password,
                     power:vm.power,
-                    id:vm.id
-                })
+                    real_name:vm.real_name,
+                    group:vm.userType
+                }
+                vm.userApi(url,data,'新增用户成功');
+            },
+            reviseUser: function () {
+                let vm = this;
+                let url = window.$g_Api+'/oa/manage/update_user_info'
+                let data = {
+                    token:vm.token,
+                    uid:vm.uid,
+                    username:vm.username,
+                    password:vm.password,
+                    power:vm.power,
+                    id:vm.id,
+                    real_name:vm.real_name,
+                    group:vm.userType
+                }
                 vm.userApi(url,data,'修改用户成功!');
             },
             userApi: function (url,data,resultMessage) {
@@ -178,12 +225,14 @@
                     vm.$message.warning('用户名和密码不能为空');
                     return false;
                 }
+                vm.loading = true;
                 vm.$axios({
                     method:'post',
                     url:url,
                     data:data
                 })
                     .then(function(res){
+                        vm.loading = false;
                         if(res.data.code == 0){
                             vm.$message.success(resultMessage);
                             vm.getuserlist();
@@ -202,15 +251,14 @@
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api+'/oa/manage/remove_user',
-                    data:vm.$qs.stringify({
+                    data:{
                         token:vm.token,
                         uid:vm.uid,
                         id:id
-                    })
+                    }
                 })
                    .then(function(res){
                        if(res.data.code == 0){
-                           vm.$message.success('删除成功!');
                            vm.getuserlist();
                        }
                    })
@@ -239,10 +287,10 @@
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api+'/oa/manage',
-                    data:vm.$qs.stringify({
+                    data:{
                         token:vm.token,
                         uid:vm.uid,
-                    })
+                    }
                 })
                    .then(function(res){
                        if(res.data.code == 0){
@@ -290,7 +338,10 @@
             }
         }
         .userlist_box{
+            height: 100%;
             table{
+                height: 80%;
+                overflow: auto;
                 text-align: left;
                 border-collapse: collapse;
                 tr{

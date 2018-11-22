@@ -28,13 +28,14 @@
                 <el-table
                     :data="content"
                     stripe
-                    height="450"
+                    height="80%"
                     v-loading='loading'
                     style="width: 100%">
                     <el-table-column v-for='(value,key,index) in title' :key='index'
                         highlight-current-row= true
                         :fixed='index<2?true:false'
-                        :label="value">
+                        :label="value"
+                        :width='index<2?120:180'>
                         <template slot-scope="scope">
                             <input
                                 v-if="key == 't0'"
@@ -42,11 +43,12 @@
                                 :disabled="true"
                                 v-model="scope.row[key]">
                             <span v-else-if="key == 't1'">{{scope.row[key] | getName}}</span>
-                            <span v-else class='tip_box' @mouseenter='getInfo(value,key,index)' @mouseleave='leave()'>
+                            <span v-else class='tip_box' @mouseenter='getInfo(value,scope.row["t1"])' @mouseleave='leave()' style='width: 180px'>
                                 {{scope.row['t'+index]}}
                                 <sup
                                     :class="(scope.row['t'+index]-scope.row['t'+(index+1)]>0?'sub1':'sub2')"
                                     style='margin-left: 6px;'>{{[(scope.row['t'+index]),(scope.row['t'+(index+1)])] | setSub()}}
+                                    <i :class="['fontfamily',scope.row['t'+index]-scope.row['t'+(index+1)]>0?'te-oa-xiangshang':'te-oa-xiangxia']"></i>
                                 </sup>
                             </span>
                         </template>
@@ -58,36 +60,35 @@
             <div class="tip_header">
                 <p class="tip_title">
                     <i></i>信息情况 微信号
-                    <span>Ua9876</span>
+                    <span>{{info.wechat_id}}</span>
                 </p>
-                <p class="item">
-                    人数组:xxx小组 编号: 2
-                </p>
+                <!--<p class="item">-->
+                    <!--人数组:xxx小组 编号: 2-->
+                <!--</p>-->
             </div>
-            <div class="tip_content">
+            <div class="tip_content" v-loading='infolaoding'>
                 <div class="content_left">
                     <p class="qiu">人数</p>
                     <div class="number">
                         <p>总人数</p>
-                        <p class="nb">56789</p>
+                        <p class="nb">{{info.customer}}</p>
                     </div>
                     <div class="increase">
-                        <p>比前日增长<span>124314</span><sup v-if='1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
-                        <p>比前7天增长<span>1234</span><sup v-if='1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
-                        <p>比前30天增长<span>14144</span><sup v-if='1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                        <p>比前日增长<span>{{info.c1}}</span><sup v-if='info.c1>0' style='color: red;'>↑</sup><i v-else-if='info.c1<0' style='color:#5daf34'>↓</i></p>
+                        <p>比前7天增长<span>{{info.c2}}</span><sup v-if='info.c2>0' style='color: red;'>↑</sup><i v-else-if='info.c2<0' style='color:#5daf34'>↓</i></p>
+                        <p>平均人数<span>{{info.c3}}</span><sup v-if='info.c3>0' style='color: red;'>↑</sup><i v-else-if='info.c3<0' style='color:#5daf34'>↓</i></p>
                     </div>
                 </div>
                 <div class="content_right">
                     <p class="qiu">订单</p>
                     <div class="number">
                         <p>总订单</p>
-                        <p class="nb">56789</p>
+                        <p class="nb">{{info.order}}</p>
                     </div>
                     <div class="increase">
-                        <p>昨日增长<span>-23423</span><sup v-if='-1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
-                        <p>7天增长<span>-234324</span><sup v-if='-1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
-                        <p>30天增长<span>-234324</span><sup v-if='-1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
-                        <p>平均订单数<span>-23432</span><sup v-if='-1>0' style='color: red;'>↑</sup><i v-else style='color:#5daf34'>↓</i></p>
+                        <p>昨日增长<span>{{info.o1}}</span><sup v-if='info.o1>0' style='color: red;'>↑</sup><i v-else-if='info.o1<0' style='color:#5daf34'>↓</i></p>
+                        <p>7天增长<span>{{info.o2}}</span><sup v-if='info.o2>0' style='color: red;'>↑</sup><i v-else-if='info.o2<0' style='color:#5daf34'>↓</i></p>
+                        <p>平均订单数<span>{{info.o3}}</span><sup v-if='info.o3>0' style='color: red;'>↑</sup><i v-else-if='info.o3<0' style='color:#5daf34'>↓</i></p>
                     </div>
                 </div>
             </div>
@@ -96,6 +97,7 @@
 </template>
 
 <script>
+    var mysettime;
     export default {
         name: 'dashboard',
         data() {
@@ -109,7 +111,18 @@
                 at:null,
                 loading:true,
                 ti:false,
-                info:{}
+                infolaoding:false,
+                info:{
+                    wechat_id:null,
+                    customer:0,
+                    order:0,
+                    c1:0,
+                    c2:0,
+                    c3:0,
+                    o1:0,
+                    o2:0,
+                    o3:0,
+                }
             }
         },
         mounted: function () {
@@ -141,13 +154,91 @@
                 the.style.top = this.y+10+'px';
                 the.style.left = this.x+10+'px';
             },
-            getInfo: function (value,key,index) {
+            getInfo: function (val,key) {
                 let vm = this;
-                console.log(value, key, index);
+                vm.info = {
+                    wechat_id:null,
+                    customer:0,
+                    order:0,
+                    c1:0,
+                    c2:0,
+                    c3:0,
+                    o1:0,
+                    o2:0,
+                    o3:0,
+                };
                 vm.getInfoBox()
+                mysettime = setTimeout(function () {
+                    vm.infolaoding = true;
+                    vm.$axios({
+                        method:'post',
+                        url:window.$g_Api+'/oa/single_detail',
+                        data:{
+                            token:vm.token,
+                            uid:vm.uid,
+                            date:val,
+                            device_account:key
+                        }
+                    })
+                        .then(function(res){
+                            let value = res.data.data;
+                            vm.info.wechat_id = value.wechat_id;
+                            let c=0;
+                            let o=0;
+                            if(value.customer_list.length > 0){
+                                // for(let i = 0 ,len = value.customer_list.length ; i < len; i++){
+                                //     c = c +value.customer_list[i]
+                                // }
+                                vm.info.customer = value.customer_list[0];
+                                vm.info.c1 = (value.customer_list[0] - value.customer_list[1]).toFixed(0);
+                                vm.info.c2 = (value.customer_list[0] - value.customer_list[6]).toFixed(0);
+                                vm.info.c3 = (c / value.customer_list.length).toFixed(0);
+                            }
+                            if(value.order_list.length > 0){
+                                // for(let i = 0 ,len = value.order_list.length ; i < len; i++){
+                                //     o = o +value.order_list[i]
+                                // }
+                                vm.info.order = value.order_list[0];
+                                vm.info.o1 = (value.order_list[0] - value.order_list[1]).toFixed(0);
+                                vm.info.o2 = (value.order_list[0] - value.order_list[6]).toFixed(0);
+                                vm.info.o3 = (o / value.order_list.length).toFixed(0);
+                            }
+                            vm.infolaoding = false;
+                        })
+                        .catch(function(err){vm.infolaoding = false;});
+                },200)
+                // const promise = new Promise(function(resolve, reject) {
+                //
+                // });
+                // promise.then(function (value) {
+                //     vm.info.wechat_id = value.wechat_id;
+                //     let c=0;
+                //     let o=0;
+                //     if(value.customer_list.length > 0 ){
+                //         // for(let i = 0 ,len = value.customer_list.length ; i < len; i++){
+                //         //     c = c +value.customer_list[i]
+                //         // }
+                //         vm.info.customer = value.customer_list[0];
+                //         vm.info.c1 = (value.customer_list[0] - value.customer_list[1]).toFixed(0);
+                //         vm.info.c2 = (value.customer_list[0] - value.customer_list[6]).toFixed(0);
+                //         vm.info.c3 = (c / value.customer_list.length).toFixed(0);
+                //     }
+                //    if(value.order_list.length > 0){
+                //        // for(let i = 0 ,len = value.order_list.length ; i < len; i++){
+                //        //     o = o +value.order_list[i]
+                //        // }
+                //        vm.info.order = value.order_list[0];
+                //        vm.info.o1 = (value.order_list[0] - value.order_list[1]).toFixed(0);
+                //        vm.info.o2 = (value.order_list[0] - value.order_list[6]).toFixed(0);
+                //        vm.info.o3 = (o / value.order_list.length).toFixed(0);
+                //    }
+                //    vm.infolaoding = false;
+                // })
 
+                // console.log(value, key, index);
             },
             leave: function () {
+                clearTimeout(mysettime)
                 this.ti = false;
             },
             getOacustomer: function () {
@@ -155,7 +246,6 @@
               vm.$axios({
                   method:'post',
                   url:window.$g_Api+'/oa/oacustomer1',
-                  data:{}
               })
                  .then(function(res){})
                  .catch(function(err){});
@@ -174,8 +264,8 @@
                 }
                 vm.$axios({
                     method:'post',
-                    url:window.$g_Api + '/oa/daydata',
-                    data:vm.$qs.stringify(data)
+                    url:window.$g_Api + '/oa/daydata1',
+                    data:data
                 })
                     .then(function(res){
                         // let obj1={};
@@ -290,7 +380,7 @@
         }
         #tip_content{
             width: 600px;
-            height: 400px;
+            height: 160px;
             position: fixed;
             left: 0;
             top:0;

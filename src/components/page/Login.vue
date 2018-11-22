@@ -47,14 +47,13 @@
                         vm.$axios({
                             method:'post',
                             url:window.$g_Api+'/oa/login',
-                            data: vm.$qs.stringify(vm.ruleForm)
+                            data:vm.ruleForm
                         })
                            .then(function(res){
                                vm.loading  = false;
                                if(res.data.code == 0){
                                    //更改store中token,role,auth
                                    sessionStorage.setItem('token',res.data.data.token);
-                                   sessionStorage.getItem('token')
                                    sessionStorage.setItem('role',res.data.data.role);
                                    sessionStorage.setItem('uid',res.data.data.uid);
                                    sessionStorage.setItem('auth',JSON.stringify(res.data.data.auth));

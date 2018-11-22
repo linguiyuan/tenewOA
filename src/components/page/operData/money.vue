@@ -17,13 +17,15 @@
                 :on-success='uploadFile'
                 :auto-upload="false">
                 <el-button size="small" slot="trigger" type="primary" style='height: 36px;'>选择文件</el-button>
-                <el-button size="small" type="success" style='height: 36px;margin: 0px 30px;' @click='submitUpload' v-loading='up'>
+                <el-button size="small" type="success" style='height: 36px;margin: 0px 30px;' @click='submitUpload' plain :disabled='btn1'>
                     上传到服务器
                 </el-button>
             </el-upload>
-            <el-button type="primary" @click='pay' style='height: 36px;margin-left: 10px; overflow: hidden' v-loading='transfer'element-loading-text="转账中"
-                       element-loading-spinner="el-icon-loading"
-                       element-loading-background="rgba(0, 0, 0, 0.8)">开始转账</el-button>
+            <el-button type="primary" @click='pay' style='height: 36px;margin-left: 10px; overflow: hidden' :loading='transfer' :disabled='btn2'>开始转账</el-button>
+            <p style='margin-left: 50px;display: flex;justify-content: flex-start;line-height: 32px;white-space: nowrap'>
+                <el-input placeholder='填写金额' style='width: 100px;' v-model='deposit' @keydown.enter.native='setdeposit'></el-input>
+                <span style='margin-left: 30px;'>余额:<i style='margin-left: 8px;'>{{balance}}</i></span>
+            </p>
         </div>
         <div class="textbox" v-show='preview == 1?true:false'>
             <p v-for='(item,index) in websockData' :key='index'>{{item}}</p>
@@ -87,7 +89,6 @@
                 websock: null,
                 websockData: [],
                 url: window.$g_Api + '/oa/upload_excel',
-                load: true,
                 token: sessionStorage.getItem('token'),
                 uid: sessionStorage.getItem('uid'),
                 resultlist: null,
@@ -95,21 +96,56 @@
                 preview:1,
                 allorder:null,
                 allmoney:null,
-                up:false,
-                transfer:false
+                transfer:false,
+                btn1:true,
+                btn2:true,
+                balance:'',
+                deposit:'',
             }
         },
-        created() {
+        mounted() {
+            this.setbalance();
         },
         computed: {},
         methods: {
-            //确定启动程序提示对话框
-            accAdd: function (arg1,arg2) {
-                    var r1,r2,m;
-                    try{r1=arg1.toString().split(".")[1].length}catch(e){r1=0}
-                    try{r2=arg2.toString().split(".")[1].length}catch(e){r2=0}
-                    m=Math.pow(10,Math.max(r1,r2))
-                    return (arg1*m+arg2*m)/m
+            setbalance: function () {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/balance_preview',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid,
+                    }
+                })
+                   .then(function(res){
+                       if(res.data.code == 0){
+                           vm.balance = res.data.data;
+                       }
+                   })
+                   .catch(function(err){});
+            },
+            setdeposit: function () {
+                let vm = this;
+                if(!vm.deposit){return false}
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/balance_deposit',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid,
+                        deposit:vm.deposit
+                    }
+                })
+                    .then(function(res){
+                        vm.setbalance();
+                        vm.$notify({
+                            title: '提示',
+                            message: res.data.message,
+                        });
+
+                    })
+                    .catch(function(err){});
             },
             open() {
                 let vm = this;
@@ -164,20 +200,21 @@
             websocketclose(e) {  //关闭
                 if (this.websock.readyState == 3 && !!this.websock) {
                     this.websockData.push('执行完毕,断开连接')
-                    this.load = false;
                     // window.location.href =window.$g_Api+"/oa/download_transfer_excel"
                     // window.location.href ="http://www.baidu.com"
                     // window.open(window.$g_Api+"/oa/download_transfer_excel");
                     // this.openNew(window.$g_Api+"/oa/download_transfer_excel")
-                    this.openNew(window.$g_Api + "/oa/download_transfer_excel")
+                    // this.openNew(window.$g_Api + "/oa/download_transfer_excel");
+                    let tempwindow=window.open('_blank');
+                    tempwindow.location=window.$g_Api + "/oa/download_transfer_excel"
                 } else {
                     this.websockData.push('程序出错,断开连接')
                 }
             },
             uploadFile: function (response, file, fileList) {
-                this.up = false;
                 if (response.code == 0) {
                     this.$message.success('上传成功');
+                    this.btn2 = false;
                 } else {
                     alert(response.message);
                 }
@@ -191,10 +228,10 @@
                 this.$message.error(err.message)
             },
             submitUpload() {
-                this.up = true;
                 this.$refs.upload.submit();
             },
             changefile: function (file, fileList) {
+                this.btn1 = false;
                 this.preview = 2;
                 if (file.name.split('.')[1] != 'xls' && file.name.split('.')[1] != 'xlsx') {
                     this.$message({message: '上传文件格式错误，请上传xls、xlsx文件！', type: 'warning'});
@@ -234,9 +271,12 @@
                             let outdata = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);//outdata就是你想要的东西
                             let money = 0;
                             for(let i = 0 ,len = outdata.length ; i < len; i++){
-                                money = _this.accAdd(money,outdata[i]['金额']);
+                                // money = _this.accAdd(money,outdata[i]['金额']);
+                                // money = (money+outdata[i]['金额']).toFixed(2);
+
+                                money = money+Number(outdata[i]['金额']);
                             }
-                            _this.allmoney = money;
+                            _this.allmoney = money.toFixed(2);
                             _this.outdata = outdata;
                             _this.allorder = outdata.length;
                         }
@@ -257,12 +297,12 @@
                 }
                 vm.$axios({
                     method: 'post',
-                    url: window.$g_Api + '/oa/money',
-                    data: vm.$qs.stringify(data)
+                    url: window.$g_Api + '/oa/money?uid='+vm.uid,
+                    data: data
                 })
                     .then(function (res) {
                         vm.transfer = false;
-                        if (res.data.code == 0 && !!res.data.data) {
+                        if (res.data.code == 0 && res.data.data) {
                             vm.$notify({
                                 title: '提示',
                                 message: '转账成功',
@@ -270,6 +310,8 @@
                             });
                             vm.preview = 3
                             vm.resultlist = res.data.data;
+                            vm.btn2 = true;
+                            vm.setbalance();
                         }
                     })
                     .catch(function (err) {
@@ -312,6 +354,7 @@
             background-color: #ffffff;
         }
         .feedback_box {
+            height: 80%;
             width: 100%;
             margin-top: 20px;
             overflow-x: auto;

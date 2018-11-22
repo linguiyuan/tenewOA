@@ -41,10 +41,10 @@ export default {
             vm.$axios({
                 method:'post',
                 url:window.$g_Api+'/oa/operationlog',
-                data:JSON.stringify({
+                data:{
                     token:vm.token,
                     uid:vm.uid,
-                })
+                }
             })
                .then(function(res){
                    if(res.data.code == 0){

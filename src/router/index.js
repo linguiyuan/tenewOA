@@ -7,13 +7,18 @@ export default new Router({
     routes: [
         {
             path: '/',
-            redirect: '/datastatistics1'
+            redirect: '/oacustomer1'
         },
         {
             path: '/',
             component: resolve => require(['../components/common/Home.vue'], resolve),
             meta: { title: '自述文件' },
             children:[
+                {
+                    path: '/check_order',
+                    component: resolve => require(['../components/page/viewData/check_order .vue'], resolve),
+                    meta: { title: '订单查询' }
+                },
                 {
                     path: '/datastatistics1',
                     component: resolve => require(['../components/page/viewData/dataDtatistics1.vue'], resolve),
@@ -55,6 +60,11 @@ export default new Router({
                     meta: { title: '转账记录' }
                 },
                 {
+                    path: '/groupdata',
+                    component: resolve => require(['../components/page/viewData/groupdata.vue'], resolve),
+                    meta: { title: '分组数据' }
+                },
+                {
                     path: '/datastatistics2',
                     component: resolve => require(['../components/page/operData/dataDtatistics2.vue'], resolve),
                     meta: { title: '实时数据2' }
@@ -70,11 +80,6 @@ export default new Router({
                     meta: { title: '客户人数2' }
                 },
                 {
-                    path: '/order2',
-                    component: resolve => require(['../components/page/operData/order2.vue'], resolve),
-                    meta: { title: '订单比2'}
-                },
-                {
                     path: '/achievement2',
                     component: resolve => require(['../components/page/operData/achievement2.vue'], resolve),
                     meta: { title: '员工绩效2'}
@@ -82,7 +87,7 @@ export default new Router({
                 {
                     path: '/profits2',
                     component: resolve => require(['../components/page/operData/profits2.vue'], resolve),
-                    meta: { title: '股东收益2'}
+                    meta: { title: '股东管理'}
                 },
                 {
                     path: '/money',
@@ -95,15 +100,30 @@ export default new Router({
                     meta: { title: '设备管理2'}
                 },
                 {
+                    path: '/groupmanagement',
+                    component: resolve => require(['../components/page/operData/groupmanagement.vue'], resolve),
+                    meta: { title: '分组管理'}
+                },
+                {
+                    path: '/usercenter',
+                    component: resolve => require(['../components/page/operData/usercenter.vue'], resolve),
+                    meta: { title: '用户中心'}
+                },
+                {
                     // 权限页面
                     path: '/manage',
                     component: resolve => require(['../components/page/manage.vue'], resolve),
-                    meta: { title: '权限管理', permission: true }
+                    meta: { title: '用户管理'}
                 },
                 {
                     path: '/operationlog',
                     component: resolve => require(['../components/page/operationlog.vue'], resolve),
                     meta: { title: '操作日志'}
+                },
+                {
+                    path: '/403',
+                    component: resolve => require(['../components/page/403.vue'], resolve),
+                    meta: { title: '更新日志'}
                 },
             ]
         },
@@ -111,17 +131,5 @@ export default new Router({
             path: '/login',
             component: resolve => require(['../components/page/Login.vue'], resolve)
         },
-        {
-            path: '/404',
-            component: resolve => require(['../components/page/404.vue'], resolve)
-        },
-        {
-            path: '/403',
-            component: resolve => require(['../components/page/403.vue'], resolve)
-        },
-        {
-            path: '*',
-            redirect: '/404'
-        }
     ]
 })

@@ -126,7 +126,7 @@
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api + '/oa/daydata',
-                    data:vm.$qs.stringify(data)
+                    data:data
                 })
                     .then(function(res){
                         // let obj1={};

@@ -2,12 +2,27 @@
     <div id='oacustomer' class='my_wap'>
         <p class="position"><i class="el-icon-location-outline"></i>您现在的位置：数据统计 > 客户人数</p>
         <!--<el-button type="primary" style="margin-bottom:10px" @click="dialogVisible = true">添加</el-button>-->
+        <div class="da_header">
+            <p>查询时间：</p>
+            <el-date-picker
+                v-model="queryTime "
+                type="daterange"
+                align="left"
+                unlink-panels
+                format="yyyy 年 MM 月 dd 日"
+                value-format="yyyy-MM-dd"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期">
+            </el-date-picker>
+            <el-button type="primary" style='margin-left: 15px;' @click='getEveryDay'>点击搜索</el-button>
+        </div>
         <div class="my_table_box">
             <template>
                 <el-table
                     :data="content"
                     stripe
-                    height="450"
+                    height="80%"
                     style="width: 100%">
                     <el-table-column v-for='(value,key,index) in title' :key='index'
                                      highlight-current-row= true
@@ -20,7 +35,7 @@
                                 {{scope.row['t'+index]}}
                                 <sup
                                     :class="(scope.row['t'+index]-scope.row['t'+(index+1)]>0?'sub1':'sub2')"
-                                    style='margin-left: 6px;'>{{[(scope.row['t'+index]),(scope.row['t'+(index+1)])] | setSub()}}
+                                    style='margin-left: 6px;'>{{[(scope.row['t'+index]),(scope.row['t'+(index+1)])] | setSub1()}}
                                 </sup>
                             </span>
                         </template>
@@ -43,6 +58,7 @@
                 dialogVisible: false,
                 dialogVisible1: false,
                 at:null,
+                queryTime:[],
             }
         },
         mounted: function () {
@@ -53,7 +69,12 @@
             getEveryDay: function () {
                 let vm = this;
                 vm.at = null
-                vm.getAxios()
+                vm.getAxios({
+                    token:vm.token,
+                    uid:vm.uid,
+                    start_time:vm.queryTime[0],
+                    end_time:vm.queryTime[1]
+                })
             },
             getAxios: function (data,nb) {
                 let vm = this;
@@ -66,7 +87,7 @@
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api + '/oa/oacustomer1',
-                    data:vm.$qs.stringify(data)
+                    data:data
                 })
                     .then(function(res){
                         if(res.data.code == 0){

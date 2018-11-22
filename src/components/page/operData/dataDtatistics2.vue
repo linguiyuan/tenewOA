@@ -134,7 +134,7 @@
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api + '/oa/datastatistics1',
-                    data:vm.$qs.stringify(data)
+                    data:data
                 })
                     .then(function(res){
                         vm.loading = false;

@@ -1,7 +1,7 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
 }
 html,
 body,
@@ -26,7 +26,7 @@ a {
     right: 0;
     top: 70px;
     bottom: 0;
-    overflow-y: scroll;
+    /*overflow-y: scroll;*/
     -webkit-transition: left .3s ease-in-out;
     transition: left .3s ease-in-out;
     background: #f0f0f0;
@@ -34,7 +34,8 @@ a {
 
 .content {
     width: auto;
-    padding: 40px;
+    padding: 15px;
+    height: 100%;
 }
 
 .content-collapse {
@@ -179,9 +180,15 @@ a {
     margin-right: 4px;
 }
 .my_wap{
+    width: 100%;
+    height: 100%;
+    overflow: auto !important;
     background-color: #ffffff;
-    padding: 40px;
+    padding: 20px;
     border-radius:20px;
+}
+.my_tag:hover{
+    cursor: pointer;
 }
 
 /*table{*/

@@ -16,22 +16,21 @@
             </el-date-picker>
             <el-button type="primary" style='margin-left: 15px;' @click='getEveryDay'>点击搜索</el-button>
             <p class="shortcut">
-                <span @click='getAxios("time=today",1)' :class="{activate:at==1?true:false}">今日</span>
-                <span @click='getAxios("time=yesterday",2)' :class="{activate:at==2?true:false}">昨日</span>
-                <span @click='getAxios("time=this_month",3)' :class="{activate:at==3?true:false}">本月</span>
-                <span @click='getAxios("time=last_month",4)' :class="{activate:at==4?true:false}">上月</span>
+                <span @click='getAxios("","today",1)' :class="{activate:at==1?true:false}">今日</span>
+                <span @click='getAxios("","yesterday",2)' :class="{activate:at==2?true:false}">昨日</span>
+                <span @click='getAxios("","this_month",3)' :class="{activate:at==3?true:false}">本月</span>
+                <span @click='getAxios("","last_month",4)' :class="{activate:at==4?true:false}">上月</span>
             </p>
         </div>
-        <template>
+        <template style='height: 100%;'>
             <el-table
                 :data="content"
                 stripe
-                v-loading="loading"
-                height="450"
-                style="width: 100%">
+                height='80%'
+                v-loading="loading">
                 <el-table-column
-                 prop="device"
-                 label="设备">
+                    prop="device"
+                    label="设备">
                 </el-table-column>
                 <el-table-column
                     prop="account"
@@ -85,48 +84,53 @@
         name: 'datadtatistics',
         data() {
             return {
-                queryTime:'',
-                content:null,
-                at:'',
-                loading:true
+                queryTime: '',
+                content: null,
+                at: '',
+                loading: true,
+                uid: sessionStorage.getItem('uid'),
+                token: sessionStorage.getItem('token'),
             }
         },
         mounted: function () {
-            this.getAxios()
+            this.getAxios({
+                start_time: this.queryTime[0],
+                end_time: this.queryTime[1],
+                token: this.token,
+                uid: this.uid
+            })
         },
         computed: {},
-        methods:{
+        methods: {
             getEveryDay: function () {
                 let vm = this;
                 vm.at = null;
                 vm.getAxios({
-                    start_time:vm.queryTime[0],
-                    end_time:vm.queryTime[1],
-                    token:sessionStorage.getItem('token')
+                    start_time: vm.queryTime[0],
+                    end_time: vm.queryTime[1],
+                    token: vm.token,
+                    uid: vm.uid
                 })
             },
-            getAxios: function (data,nb) {
+            getAxios: function (data,ac,nb) {
                 let vm = this;
                 vm.loading = true;
-                data = vm.$qs.parse(data);
-                if(nb){
+                let newdata;
+                if (nb) {
                     vm.at = nb;
                 }
-                if(!data){
-                    data = {token:sessionStorage.getItem('token')}
-                }else if(!data.token){
-                    data.token = sessionStorage.getItem('token')
-                }
+                data?newdata=data:newdata = {token:vm.token, uid:vm.uid,time:ac};
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api + '/oa/datastatistics1',
-                    data:vm.$qs.stringify(data)
+                    method: 'post',
+                    url: window.$g_Api + '/oa/datastatistics1',
+                    data: newdata
                 })
-                    .then(function(res){
+                    .then(function (res) {
                         vm.loading = false;
                         vm.content = res.data.data
                     })
-                    .catch(function(err){});
+                    .catch(function (err) {
+                    });
             },
         }
     }
@@ -135,36 +139,37 @@
 
 
 <style lang='scss' scoped>
-    #nowtimeOrders{
-        table,thead,tbody,tr,th,td{
+    #nowtimeOrders {
+
+        table, thead, tbody, tr, th, td {
             border: 1px solid #dedede;
-            white-space:nowrap;
+            white-space: nowrap;
         }
-        .da_header{
+        .da_header {
             display: flex;
             justify-content: flex-start;
             height: 32px;
             line-height: 32px;
             margin-bottom: 20px;
-            .shortcut{
+            .shortcut {
                 margin-left: 40px;
-                span{
+                span {
                     display: inline-block;
                     width: 50px;
                     color: #409eff;
-                    &:hover{
+                    &:hover {
                         cursor: pointer;
                     }
                 }
-                .activate{
+                .activate {
                     color: #e6a23c;
                 }
             }
         }
-        .device{
+        .device {
             width: 100%;
             background-color: transparent;
-            border:none;
+            border: none;
             color: #606266;
             font-size: 12px;
         }

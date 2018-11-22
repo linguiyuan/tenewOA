@@ -5,11 +5,11 @@
         <div class="my_table_box">
             <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
             <template>
-                <el-checkbox-group v-model="checkedId" @change="handleCheckedCitiesChange">
+                <el-checkbox-group v-model="checkedId" @change="handleCheckedCitiesChange" style='height: 100%;'>
                 <el-table
                     :data="content"
                     stripe
-                    height="450"
+                    height="80%"
                     style="width: 100%">
                     <el-table-column v-for='(value,key,index) in title' :key='index'
                                      highlight-current-row= true
@@ -17,12 +17,22 @@
                                      :label="value"
                                      :min-width="index==1?'180':'160'">
                         <template slot-scope="scope">
-                            <span v-if="key == 't0'"><el-checkbox :label="scope.row[key]">{{scope.row[key]}}</el-checkbox></span>
-                            <span v-else style='display: block;width: 100%;height: 100%;' @click='reviseData(scope.row["t0"],title["t"+index],scope.row["t"+index])'>
+                            <span v-if="key == 't0'">
+                                <el-checkbox :label="scope.row[key]" v-if='scope.row["t0"] != "总和"'>{{scope.row[key]}}</el-checkbox>
+                                <span v-else style='font-size: 14px;'>{{scope.row[key]}}</span>
+                            </span>
+                            <span v-else-if='scope.row["t0"] != "总和"' style='display: block;width: 100%;height: 100%;' @click='reviseData(scope.row["t0"],title["t"+index],scope.row["t"+index])'>
                                 {{scope.row['t'+index]}}
                                 <sup
                                     :class="(scope.row['t'+index]-scope.row['t'+(index+1)]>0?'sub1':'sub2')"
-                                    style='margin-left: 6px;'>{{[(scope.row['t'+index]),(scope.row['t'+(index+1)])] | setSub()}}
+                                    style='margin-left: 6px;'>{{[(scope.row['t'+index]),(scope.row['t'+(index+1)])] | setSub1()}}
+                                </sup>
+                            </span>
+                            <span v-else style='display: block;width: 100%;height: 100%;' class='cur'>
+                                {{scope.row['t'+index]}}
+                                <sup
+                                    :class="(scope.row['t'+index]-scope.row['t'+(index+1)]>0?'sub1':'sub2')"
+                                    style='margin-left: 6px;'>{{[(scope.row['t'+index]),(scope.row['t'+(index+1)])] | setSub1()}}
                                 </sup>
                             </span>
                         </template>
@@ -36,7 +46,7 @@
             :visible.sync="dialogVisible"
             width="30%">
             <span>新备注:</span>
-            <input type="text" v-model='addName'>
+            <input type="text" v-model='addName' @keyup.enter.native="addNewName(addName)">
             <span slot="footer" class="dialog-footer">
                 <el-button @click="dialogVisible = false">取 消</el-button>
                 <el-button type="primary" @click="addNewName(addName)">确 定</el-button>
@@ -56,7 +66,7 @@
             </p>
             <p>
                 <span>人数:</span>
-                <input type="text" v-model='reviseNumber'>
+                <input type="text" v-focus v-model='reviseNumber' @focus="focus($event)" @keyup.enter="addNewName(reviseName,reviseTime,reviseNumber)">
             </p>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="dialogVisible1 = false">取 消</el-button>
@@ -88,11 +98,22 @@
                 checkedId:[],
             }
         },
+        directives: {
+            focus: {
+                // 指令的定义
+                inserted: function (el) {
+                    el.focus()
+                }
+            }
+        },
         mounted: function () {
             this.getAxios()
         },
         computed: {},
         methods:{
+            focus:function(event){
+                event.currentTarget.select();
+            },
             getEveryDay: function () {
                 let vm = this;
                 vm.at = null
@@ -109,7 +130,7 @@
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api + '/oa/oacustomer1',
-                    data:vm.$qs.stringify(data)
+                    data:data
                 })
                     .then(function(res){
                         if(res.data.code == 0){
@@ -139,13 +160,13 @@
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api + '/oa/customerstatistics',
-                    data:vm.$qs.stringify({
+                    data:{
                         username:name,
                         time:time,
                         data:data,
                         token:vm.token,
                         uid:vm.uid
-                    })
+                    }
                 })
                    .then(function(res){
                        if(res.data.code == 0){
@@ -209,6 +230,11 @@
             thead{
                 th{
                     background-color: #50bfff;
+                }
+            }
+            .cur{
+                &:hover{
+                cursor: pointer;
                 }
             }
             .sub1{
