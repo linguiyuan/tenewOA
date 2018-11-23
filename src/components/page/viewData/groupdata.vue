@@ -8,6 +8,7 @@
                 <el-radio :label="3">设备信息</el-radio>
             </el-radio-group>
         </template>
+
     </div>
 </template>
 

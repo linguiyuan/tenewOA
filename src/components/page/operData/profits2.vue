@@ -23,7 +23,7 @@
                 <!--</span>-->
                 <!--</div>-->
                 <el-table
-                    :data="tableData"
+                    :data="shareholder_list"
                     height="80%"
                     key='tableData'
                     style="width: 100%;font-size: 14px;">
@@ -39,13 +39,17 @@
                         prop="devices_num"
                         label='总设备数'>
                     </el-table-column>
+                    <!--<el-table-column-->
+                        <!--prop="need_storage"-->
+                        <!--label='应存备用金'>-->
+                    <!--</el-table-column>-->
+                    <!--<el-table-column-->
+                        <!--prop="already_storage"-->
+                        <!--label='已存备用金'>-->
+                    <!--</el-table-column>-->
                     <el-table-column
-                        prop="need_storage"
-                        label='应存备用金'>
-                    </el-table-column>
-                    <el-table-column
-                        prop="already_storage"
-                        label='已存备用金'>
+                        prop="sh_percent"
+                        label='分红'>
                     </el-table-column>
                     <el-table-column
                         label='操作'>
@@ -90,39 +94,45 @@
                                 label="设备">
                             </el-table-column>
                             <el-table-column
-                                prop="account"
-                                label="账号">
-                            </el-table-column>
-                            <el-table-column
-                                prop="online_number"
-                                label="注册手机号">
-                            </el-table-column>
-                            <el-table-column
-                                prop="phone_number"
-                                label="联系方式">
+                                prop="wechat_id"
+                                label="微信号">
                             </el-table-column>
                             <el-table-column
                                 prop="qq_id"
                                 label="QQ号">
                             </el-table-column>
                             <el-table-column
+                                prop="online_number"
+                                label="号码卡">
+                            </el-table-column>
+                            <el-table-column
+                                prop="phone_number"
+                                label="上网卡">
+                            </el-table-column>
+                            <el-table-column
+                                prop="account"
+                                label="账号">
+                            </el-table-column>
+                            <el-table-column
+                                prop='status'
+                                label="在线情况">
+                            </el-table-column>
+                            <el-table-column
+                                prop="sesstion_update_time"
+                                label="授权截止时间">
+                                <!--<template slot-scope='scope'>-->
+                                <!--<span>{{scope.row.sesstion_update_time | sq()}}</span>-->
+                                <!--</template>-->
+                            </el-table-column>
+                            <el-table-column
                                 prop="remark"
                                 label="备注">
                             </el-table-column>
                             <el-table-column
-                                prop="wechat_id"
-                                label="微信号">
-                            </el-table-column>
-                            <el-table-column
-                                prop='status'
-                                label="状态">
-                            </el-table-column>
-                            <el-table-column
-                                prop="sesstion_update_time"
-                                label="授权">
-                                <!--<template slot-scope='scope'>-->
-                                <!--<span>{{scope.row.sesstion_update_time | sq()}}</span>-->
-                                <!--</template>-->
+                                label="操作">
+                                <template slot-scope='scope'>
+                                    <span @click='delDev(scope.row.eid)' class='sp'>删除设备</span>
+                                </template>
                             </el-table-column>
                         </el-table>
                     </template>
@@ -131,28 +141,20 @@
         </template>
         <template v-else-if='radio == 2'>
             <el-table
-                :data="tableData1"
+                :data="partner_list"
                 height="80%"
                 style="width: 100%;font-size: 14px;">
                 <el-table-column
-                    prop="date"
-                    label="日期 年/月">
-                </el-table-column>
-                <el-table-column
                     prop="name"
-                    label="合伙人1">
+                    label="合伙人">
                 </el-table-column>
                 <el-table-column
-                    prop="devs"
-                    label='设备'>
+                    prop="devices_num"
+                    label="设备数">
                 </el-table-column>
                 <el-table-column
-                    prop="place"
-                    label='场地'>
-                </el-table-column>
-                <el-table-column
-                    prop="cost"
-                    label='总运营成本'>
+                    prop="sh_percent"
+                    label='分红'>
                 </el-table-column>
             </el-table>
         </template>
@@ -183,6 +185,7 @@
             <template v-loading='getdevlistloading'>
                 <el-table
                     :data="deviceList"
+                    v-loading='addloading'
                     @selection-change="handleSelectionChange"
                     height="80%"
                     border
@@ -196,40 +199,40 @@
                         label="设备">
                     </el-table-column>
                     <el-table-column
-                        prop="account"
-                        label="账号">
-                    </el-table-column>
-                    <el-table-column
-                        prop="online_number"
-                        label="注册手机号">
-                    </el-table-column>
-                    <el-table-column
-                        prop="phone_number"
-                        label="联系方式">
+                        prop="wechat_id"
+                        label="微信号">
                     </el-table-column>
                     <el-table-column
                         prop="qq_id"
                         label="QQ号">
                     </el-table-column>
                     <el-table-column
-                        prop="remark"
-                        label="备注">
+                        prop="online_number"
+                        label="号码卡">
                     </el-table-column>
                     <el-table-column
-                        prop="wechat_id"
-                        label="微信号">
+                        prop="phone_number"
+                        label="上网卡">
                     </el-table-column>
                     <el-table-column
-                        label="状态">
+                        prop="account"
+                        label="账号">
+                    </el-table-column>
+                    <el-table-column
+                        label="在线情况">
                         <template slot-scope="scope">
                             <span :class='{"te":scope.row.status == "掉线"}'>{{scope.row.status}}</span>
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="授权">
+                        label="授权截止时间">
                         <template slot-scope='scope'>
                             <span>{{scope.row.sesstion_update_time | sq()}}</span>
                         </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="remark"
+                        label="备注">
                     </el-table-column>
                 </el-table>
             </template>
@@ -259,32 +262,11 @@
                     shareholders: '',
                     shareholderspassword: '',
                 },
-                tableData: [],
+                shareholder_list: [],
+                cost_record:[],
+                partner_list:[],
                 tableData1: [
-                    {
-                        date: '2018-11',
-                        name: "合伙人1",
-                        pt: '2134',
-                        devs: 5,
-                        place: 'XXX场地',
-                        cost: 2343
-                    },
-                    {
-                        date: '2018-11',
-                        name: "合伙人1",
-                        pt: '2134',
-                        devs: 5,
-                        place: 'XXX场地',
-                        cost: 2343
-                    },
-                    {
-                        date: '2018-11',
-                        name: "合伙人1",
-                        pt: '2134',
-                        devs: 5,
-                        place: 'XXX场地',
-                        cost: 2343
-                    },
+
                 ],
                 newData: {
                     date: null,
@@ -293,21 +275,9 @@
                     area: null,
                     cost: null,
                 },
-                devicelist: [
-                    // {
-                    //     account: "圣明10",
-                    //     device: "代理",
-                    //     online_number: 12345678,
-                    //     phone_number: 1234567,
-                    //     qq_id: 4566435,
-                    //     remark: '无',
-                    //     sequence: 1,
-                    //     sesstion_update_time: "2018-11-07 14:56:51",
-                    //     status: "在线",
-                    //     wechat_id: 'w_88j'
-                    // }
-                ],
-                selectNb:[]
+                devicelist: [],
+                selectNb:[],
+                addloading:false,
             }
         },
         mounted: function () {
@@ -332,7 +302,9 @@
                 })
                    .then(function(res){
                        if(res.data.code == 0){
-                           vm.tableData = res.data.data;
+                           vm.shareholder_list = res.data.data.shareholder_list;
+                           vm.partner_list = res.data.data.partner_list;
+                           vm.cost_record = res.data.data.cost_record;
                        }
                        vm.$message.success(res.data.message);
                    })
@@ -340,6 +312,7 @@
             },
             back: function () {
                 this.radio2 = '1';
+                this.getshareholderslist();
             },
             //查看股东设备详情
             setinfo: function (id) {
@@ -374,6 +347,7 @@
             getdevlist: function () {
                 let vm = this;
                 vm.getdevlistloading = true;
+                vm.addloading = true;
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api+'/oa/devices1',
@@ -384,6 +358,7 @@
                 })
                     .then(function(res){
                         vm.getdevlistloading = false;
+                        vm.addloading = false;
                         if(res.data.code == 0){
                             vm.deviceList = res.data.data;
                         }else {
@@ -403,13 +378,6 @@
             //确认添加设备
             btn_adddev:function () {
                 let vm = this;
-                let dataa = {
-                    token:vm.token,
-                        uid:vm.uid,
-                    id:vm.id,
-                    eids:vm.selectNb
-                }
-                console.log(vm.$qs.stringify(dataa));
                 vm.$axios({
                     method:'post',
                     url:window.$g_Api+'/oa/holder/adddevice',
@@ -439,7 +407,38 @@
                            .catch(function(err){});
                    })
                    .catch(function(err){});
-            }
+            },
+            //删除设备
+            delDev: function (eid) {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/holder/deldevice',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid,
+                        id:vm.id,
+                        eids:eid
+                    }
+                })
+                   .then(function(res){
+                       vm.$alert(res.data.message);
+                       vm.$axios({
+                           method:'post',
+                           url:window.$g_Api + '/oa/owndevices',
+                           data:{
+                               token:vm.token,
+                               uid:vm.uid,
+                               id:vm.id
+                           }
+                       })
+                           .then(function(res){
+                               vm.devicelist = res.data.data;
+                           })
+                           .catch(function(err){});
+                   })
+                   .catch(function(err){});
+            },
         }
     }
 </script>
@@ -517,6 +516,12 @@
                         cursor: pointer;
                     }
                 }
+            }
+        }
+        .sp{
+            color:red;
+            &:hover{
+                cursor: pointer;
             }
         }
     }

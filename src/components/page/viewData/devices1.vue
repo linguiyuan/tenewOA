@@ -17,8 +17,11 @@
                     label="分组">
                 </el-table-column>
                 <el-table-column
-                    prop="is_promoting"
                     label="状态">
+                    <template slot-scope='scope'>
+                        <span style='color: #E6A23C;' v-if='scope.row.is_promoting == "完成推广"'>{{scope.row.is_promoting}}</span>
+                        <span v-else>{{scope.row.is_promoting}}</span>
+                    </template>
                 </el-table-column>
                 <el-table-column
                     prop="device"
@@ -44,14 +47,14 @@
                     prop="account"
                     label="账号">
                 </el-table-column>
-                <!--<el-table-column-->
-                    <!--label="状态">-->
-                    <!--<template slot-scope="scope">-->
-                        <!--<span :class='{"te":scope.row.status == "掉线"}'>{{scope.row.status}}</span>-->
-                    <!--</template>-->
-                <!--</el-table-column>-->
                 <el-table-column
-                    label="授权">
+                    label="在线情况">
+                    <template slot-scope="scope">
+                        <span :class='{"te":scope.row.status == "掉线"}'>{{scope.row.status}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    label="授权截止时间">
                     <template slot-scope='scope'>
                         <span>{{scope.row.sesstion_update_time | sq()}}</span>
                     </template>
