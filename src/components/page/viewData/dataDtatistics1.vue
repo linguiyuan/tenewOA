@@ -14,6 +14,16 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
             </el-date-picker>
+            <template>
+                <el-select v-model="group_id" placeholder="请选择小组" style='margin-left: 12px;'>
+                    <el-option
+                        v-for="item in options"
+                        :key="item.group_id"
+                        :label="item.group_name"
+                        :value="item.group_id">
+                    </el-option>
+                </el-select>
+            </template>
             <el-button type="primary" style='margin-left: 15px;' @click='getEveryDay'>点击搜索</el-button>
             <p class="shortcut">
                 <span @click='getAxios("","today",1)' :class="{activate:at==1?true:false}">今日</span>
@@ -90,18 +100,37 @@
                 loading: true,
                 uid: sessionStorage.getItem('uid'),
                 token: sessionStorage.getItem('token'),
+                options:[],
+                group_id:'',
             }
         },
         mounted: function () {
+            this.getoptions();
             this.getAxios({
                 start_time: this.queryTime[0],
                 end_time: this.queryTime[1],
                 token: this.token,
-                uid: this.uid
+                uid: this.uid,
+                group_id:this.group_id,
             })
         },
         computed: {},
         methods: {
+            getoptions: function () {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/get_group_info',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid
+                    }
+                })
+                   .then(function(res){
+                       vm.options = res.data.data;
+                   })
+                   .catch(function(err){});
+            },
             getEveryDay: function () {
                 let vm = this;
                 vm.at = null;
@@ -109,7 +138,8 @@
                     start_time: vm.queryTime[0],
                     end_time: vm.queryTime[1],
                     token: vm.token,
-                    uid: vm.uid
+                    uid: vm.uid,
+                    group_id:vm.group_id,
                 })
             },
             getAxios: function (data,ac,nb) {
@@ -119,7 +149,7 @@
                 if (nb) {
                     vm.at = nb;
                 }
-                data?newdata=data:newdata = {token:vm.token, uid:vm.uid,time:ac};
+                data?newdata=data:newdata = {token:vm.token, uid:vm.uid,time:ac,group_id:vm.group_id,};
                 vm.$axios({
                     method: 'post',
                     url: window.$g_Api + '/oa/datastatistics1',

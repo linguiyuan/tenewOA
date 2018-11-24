@@ -14,6 +14,16 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
             </el-date-picker>
+            <template>
+                <el-select v-model="group_id" placeholder="请选择小组" style='margin-left: 12px;'>
+                    <el-option
+                        v-for="item in options"
+                        :key="item.group_id"
+                        :label="item.group_name"
+                        :value="item.group_id">
+                    </el-option>
+                </el-select>
+            </template>
             <el-button type="primary" style='margin-left: 15px;' @click='getOrderlist()'>点击搜索</el-button>
             <p class="shortcut">
                 <span @click='getOrderlist("today",1)' :class="{activate:at==1?true:false}">今日</span>
@@ -59,17 +69,36 @@
                 queryTime:null,
                 at:'',
                 loading:true,
+                options:[],
+                group_id:'',
             }
         },
         mounted: function () {
-            this.getOrderlist()
+            this.getOrderlist();
+            this.getoptions();
         },
         methods:{
+            getoptions: function () {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/get_group_info',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid
+                    }
+                })
+                    .then(function(res){
+                        vm.options = res.data.data;
+                    })
+                    .catch(function(err){});
+            },
             getOrderlist: function (data,nb) {
                 let vm = this;
                 let d = {
                     token:vm.token,
                     uid:vm.uid,
+                    group_id:vm.group_id,
                 }
                 if(vm.queryTime){
                     d.start_time = vm.queryTime[0];

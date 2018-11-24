@@ -14,6 +14,16 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
             </el-date-picker>
+            <template>
+                <el-select v-model="group_id" placeholder="请选择小组" style='width: 140px;margin-left: 8px;'>
+                    <el-option
+                        v-for="item in options"
+                        :key="item.group_id"
+                        :label="item.group_name"
+                        :value="item.group_id">
+                    </el-option>
+                </el-select>
+            </template>
             <el-button type="primary" style='margin-left: 15px;' @click='getEveryDay'>点击搜索</el-button>
             <p class="shortcut">
                 <span @click='getAxios({"dbname":"amount","start_time":queryTime[0],"end_time":queryTime[1]},1)' :class="{activate:at==1?true:false}">付款金额</span>
@@ -122,11 +132,14 @@
                     o1:0,
                     o2:0,
                     o3:0,
-                }
+                },
+                options:[],
+                group_id:'',
             }
         },
         mounted: function () {
-            this.getAxios()
+            this.getAxios();
+            this.getoptions();
         },
         computed:{
             data: function (key,the,last) {
@@ -134,12 +147,30 @@
         },
         computed: {},
         methods:{
+            getoptions: function () {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/get_group_info',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid
+                    }
+                })
+                    .then(function(res){
+                        vm.options = res.data.data;
+                    })
+                    .catch(function(err){});
+            },
             getEveryDay: function () {
                 let vm = this;
                 vm.at = null
                 vm.getAxios({
+                    token:vm.token,
+                    uid:vm.uid,
                     start_time:vm.queryTime[0],
-                    end_time:vm.queryTime[1]
+                    end_time:vm.queryTime[1],
+                    group_id:vm.group_id,
                 })
             },
             //鼠标移入显示提示框
@@ -177,7 +208,7 @@
                             token:vm.token,
                             uid:vm.uid,
                             date:val,
-                            device_account:key
+                            device_account:key,
                         }
                     })
                         .then(function(res){
@@ -207,48 +238,10 @@
                         })
                         .catch(function(err){vm.infolaoding = false;});
                 },200)
-                // const promise = new Promise(function(resolve, reject) {
-                //
-                // });
-                // promise.then(function (value) {
-                //     vm.info.wechat_id = value.wechat_id;
-                //     let c=0;
-                //     let o=0;
-                //     if(value.customer_list.length > 0 ){
-                //         // for(let i = 0 ,len = value.customer_list.length ; i < len; i++){
-                //         //     c = c +value.customer_list[i]
-                //         // }
-                //         vm.info.customer = value.customer_list[0];
-                //         vm.info.c1 = (value.customer_list[0] - value.customer_list[1]).toFixed(0);
-                //         vm.info.c2 = (value.customer_list[0] - value.customer_list[6]).toFixed(0);
-                //         vm.info.c3 = (c / value.customer_list.length).toFixed(0);
-                //     }
-                //    if(value.order_list.length > 0){
-                //        // for(let i = 0 ,len = value.order_list.length ; i < len; i++){
-                //        //     o = o +value.order_list[i]
-                //        // }
-                //        vm.info.order = value.order_list[0];
-                //        vm.info.o1 = (value.order_list[0] - value.order_list[1]).toFixed(0);
-                //        vm.info.o2 = (value.order_list[0] - value.order_list[6]).toFixed(0);
-                //        vm.info.o3 = (o / value.order_list.length).toFixed(0);
-                //    }
-                //    vm.infolaoding = false;
-                // })
-
-                // console.log(value, key, index);
             },
             leave: function () {
                 clearTimeout(mysettime)
                 this.ti = false;
-            },
-            getOacustomer: function () {
-              let vm = this;
-              vm.$axios({
-                  method:'post',
-                  url:window.$g_Api+'/oa/oacustomer1',
-              })
-                 .then(function(res){})
-                 .catch(function(err){});
             },
             getAxios: function (data,nb) {
                 let vm = this;
@@ -257,10 +250,11 @@
                     vm.at = nb;
                 }
                 if(!data){
-                    data = {token:vm.token,uid:vm.uid}
+                    data = {token:vm.token,uid:vm.uid,group_id:vm.group_id,}
                 }else {
                     data.token = vm.token;
                     data.uid = vm.uid;
+                    data.group_id=vm.group_id;
                 }
                 vm.$axios({
                     method:'post',
@@ -291,26 +285,6 @@
                     })
                     .catch(function(err){});
             },
-            changeCount: function (device,account) {
-                let vm = this;
-                vm.$axios({
-                    method:'post',
-                    url:window.$g_Api + '/oa/device',
-                    data:{
-                        data:{
-                            device:device,
-                            account:account,
-                            token:sessionStorage.getItem('token')
-                        }
-                    }
-                })
-                    .then(function(res){
-                        if(res.data.code == 1){
-                            vm.$message.error('修改失败')
-                        }
-                    })
-                    .catch(function(err){});
-            }
         }
     }
 

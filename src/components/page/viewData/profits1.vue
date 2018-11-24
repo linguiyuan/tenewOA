@@ -17,6 +17,7 @@
                 </el-radio-group>
             </template>
         </div>
+        <p v-if='type == 1' style='width: 100%;'><span style='float: right;'>公司总收益:<i style='margin-left: 4px;margin-left: 8px;'>{{gs}}</i> 股东总收益:<i style='margin-left: 4px;'>{{gd}}</i></span></p>
         <template>
             <el-table
                 v-if='type == 1'
@@ -115,6 +116,8 @@
                 tableData:[],
                 tableData1:[],
                 laoding:false,
+                gs:null,
+                gd:null,
             }
         },
         mounted: function () {
@@ -140,6 +143,17 @@
                            vm.type = 1;
                            vm.tableData = res.data.data.shareholders;
                            vm.tableData1 = res.data.data.partners;
+                           let a1=0,a2=0;
+                           for(let i = 0 ,len = vm.tableData.length ; i < len; i++){
+                               if(vm.tableData[i].sh_name=='公司'){
+                                   a1 = a1 + vm.tableData[i].profit
+                               }else{
+                                   a2 = a2 + vm.tableData[i].profit
+                               }
+                           }
+                           console.log(a1,a2);
+                           vm.gs = a1.toFixed(2);
+                           vm.gd = a2.toFixed(2);
                        }else {
                            vm.type = res.data.type;
                            if(res.data.type == 1){

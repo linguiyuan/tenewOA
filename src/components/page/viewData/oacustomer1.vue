@@ -15,6 +15,16 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
             </el-date-picker>
+            <template>
+                <el-select v-model="group_id" placeholder="请选择小组" style='margin-left: 12px;'>
+                    <el-option
+                        v-for="item in options"
+                        :key="item.group_id"
+                        :label="item.group_name"
+                        :value="item.group_id">
+                    </el-option>
+                </el-select>
+            </template>
             <el-button type="primary" style='margin-left: 15px;' @click='getEveryDay'>点击搜索</el-button>
         </div>
         <div class="my_table_box">
@@ -59,13 +69,31 @@
                 dialogVisible1: false,
                 at:null,
                 queryTime:[],
+                options:[],
+                group_id:'',
             }
         },
         mounted: function () {
-            this.getAxios()
+            this.getAxios();
+            this.getoptions();
         },
         computed: {},
         methods:{
+            getoptions: function () {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/get_group_info',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid
+                    }
+                })
+                    .then(function(res){
+                        vm.options = res.data.data;
+                    })
+                    .catch(function(err){});
+            },
             getEveryDay: function () {
                 let vm = this;
                 vm.at = null
@@ -73,7 +101,8 @@
                     token:vm.token,
                     uid:vm.uid,
                     start_time:vm.queryTime[0],
-                    end_time:vm.queryTime[1]
+                    end_time:vm.queryTime[1],
+                    group_id:vm.group_id,
                 })
             },
             getAxios: function (data,nb) {
@@ -82,7 +111,7 @@
                     vm.at = nb;
                 }
                 if(!data){
-                    data = {token:vm.token,uid:vm.uid}
+                    data = {token:vm.token,uid:vm.uid,group_id:vm.group_id,}
                 }
                 vm.$axios({
                     method:'post',

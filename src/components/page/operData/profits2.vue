@@ -161,24 +161,46 @@
         <template v-else-if='radio == 3'>
             <div class="function">
                 <el-date-picker
-                    v-model="newData.date"
+                    v-model="newData.month"
                     type="month"
+                    value-format="yyyy-MM"
                     placeholder="选择月">
                 </el-date-picker>
-                <el-input v-model="newData.wages" style='width: 200px;'>
+                <el-input v-model="newData.cost_manpower" style='width: 200px;' @blur='getall'>
                     <template slot="prepend">人工:</template>
                 </el-input>
-                <el-input v-model="newData.devices" style='width: 200px;'>
+                <el-input v-model="newData.cost_device" style='width: 200px;' @blur='getall'>
                     <template slot="prepend">设备:</template>
                 </el-input>
-                <el-input v-model="newData.area" style='width: 200px;'>
+                <el-input v-model="newData.cost_rent" style='width: 200px;' @blur='getall'>
                     <template slot="prepend">场地:</template>
                 </el-input>
-                <el-input v-model="newData.cost" style='width: 200px;' :disabled="true">
+                <el-input v-model="newData.cost_all" style='width: 200px;' :disabled="true">
                     <template slot="prepend">总运营成本:</template>
                 </el-input>
-                <el-button type='primary'>增加</el-button>
+                <el-button type='primary' @click='costInof'>提交</el-button>
             </div>
+            <el-table
+                :data="cost_record"
+                height="80%"
+                style="width: 100%;font-size: 14px;">
+                <el-table-column
+                    prop="month"
+                    label="月份">
+                </el-table-column>
+                <el-table-column
+                    prop="employee_wages"
+                    label="人工">
+                </el-table-column>
+                <el-table-column
+                    prop="cost_device"
+                    label='设备'>
+                </el-table-column>
+                <el-table-column
+                    prop="cost_rent"
+                    label='场地'>
+                </el-table-column>
+            </el-table>
         </template>
         <div class="adddevisebox" v-show='adddevisebox'>
             <p><el-button type="primary" plain size='mini' @click='btn_adddev'>添加</el-button><i class="el-icon-error" @click='celadddevisebox' style='color: #666666;'></i></p>
@@ -269,11 +291,12 @@
 
                 ],
                 newData: {
-                    date: null,
-                    wages: null,
-                    devices: null,
-                    area: null,
-                    cost: null,
+                    month: '',
+                    cost_manpower: 0,
+                    cost_device: 0,
+                    cost_rent: 0,
+                    cost_id: '',
+                    cost_all:0
                 },
                 devicelist: [],
                 selectNb:[],
@@ -310,6 +333,7 @@
                    })
                    .catch(function(err){});
             },
+            //返回
             back: function () {
                 this.radio2 = '1';
                 this.getshareholderslist();
@@ -439,6 +463,32 @@
                    })
                    .catch(function(err){});
             },
+            //新增或修改成本
+            costInof: function () {
+                let vm = this;
+                let type;
+                vm.newData.cost_id?type=1:type=0;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/holder/add_cost',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid,
+                        month:vm.newData.month,
+                        cost_manpower: vm.newData.cost_manpower,
+                        cost_rent: vm.newData.cost_rent,
+                        cost_device: vm.newData.cost_device,
+                        cost_id: vm.newData.cost_id,
+                        type:type,
+                    }
+                })
+                   .then(function(res){})
+                   .catch(function(err){});
+            },
+            //计算总和
+            getall: function () {
+                this.newData.cost_all = Number(this.newData.cost_rent) + Number(this.newData.cost_device) + Number(this.newData.cost_manpower);
+            }
         }
     }
 </script>
