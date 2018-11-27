@@ -9,6 +9,16 @@
                 value-format="yyyy-MM"
                 placeholder="选择月">
             </el-date-picker>
+            <template>
+                <el-select v-model="info_id" placeholder="请选择小组" style='margin-left: 12px;' v-show='show'>
+                    <el-option
+                        v-for="item in sh_info"
+                        :key="item.sh_id"
+                        :label="item.sh_name"
+                        :value="item.sh_id">
+                    </el-option>
+                </el-select>
+            </template>
             <el-button type="primary" style='margin-left: 20px;' @click='getprofits'>查询</el-button>
             <template>
                 <el-radio-group v-model="type" style='margin-left: 100px;margin-top: 10px;' v-show='show'>
@@ -17,7 +27,13 @@
                 </el-radio-group>
             </template>
         </div>
-        <p v-if='type == 1' style='width: 100%;'><span style='float: right;'>公司总收益:<i style='margin-left: 4px;margin-left: 8px;'>{{gs}}</i> 股东总收益:<i style='margin-left: 4px;'>{{gd}}</i></span></p>
+        <p v-if='type == 1' style='width: 100%;margin-bottom: 10px;'>
+            <span>公司总收益:<i style='margin-left: 8px;color:#E6A23C;'>{{gs}}</i> </span>
+            <span style="margin-left: 20px;">股东总分红:<i style='margin-left: 8px;color:#E6A23C;'>{{gd}}</i></span>
+            <span style="margin-left: 20px;">设备总成本:<i style='margin-left: 8px;color:#E6A23C;'>{{total_cost.device_cost}}</i></span>
+            <span style="margin-left: 20px;">人工总成本:<i style='margin-left: 8px;color:#E6A23C;'>{{total_cost.employee_wages}}</i></span>
+            <span style="margin-left: 20px;">场地总成本:<i style='margin-left: 8px;color:#E6A23C;'>{{total_cost.rent}}</i></span>
+        </p>
         <template>
             <el-table
                 v-if='type == 1'
@@ -25,46 +41,84 @@
                 height="80%"
                 key='shareholders'
                 v-loading='laoding'
-                style="width: 100%;font-size: 14px;">
+                style="font-size: 14px;">
                 <el-table-column
-                    prop="sh_name"
-                    label="股东">
-                </el-table-column>
-                <el-table-column
-                    prop="sh_ratio"
-                    label="分红">
-                </el-table-column>
-                <el-table-column
-                    prop="month"
+                    fixed
+                    prop="request_month"
+                    width='100px'
                     label='月份'>
                 </el-table-column>
                 <el-table-column
-                    prop="device_name"
-                    label='设备'>
+                    fixed
+                    width='100px'
+                    prop="belong_to_whom"
+                    label="所属">
                 </el-table-column>
                 <el-table-column
-                    prop="output"
-                    label='月结算预估'>
+                    fixed
+                    width='120px'
+                    prop="account_name"
+                    label="账户名">
                 </el-table-column>
                 <el-table-column
-                    prop="cost_rent"
-                    label='场地成本'>
+                    width='80px'
+                    prop="belong_to_whom_ratio"
+                    label="分红比">
                 </el-table-column>
                 <el-table-column
+                    width='110px'
+                    prop="cost_device"
+                    label='设备成本'>
+                </el-table-column>
+                <el-table-column
+                    width='110px'
                     prop="cost_man_power"
                     label='人工成本'>
                 </el-table-column>
                 <el-table-column
+                    width='110px'
                     prop="cost_payment"
-                    label='月提现金额'>
+                    label='提现成本'>
                 </el-table-column>
                 <el-table-column
-                    prop="cost_reserve"
-                    label='需补交备用金'>
+                    width='110px'
+                    prop="cost_rent"
+                    label='场地成本'>
                 </el-table-column>
                 <el-table-column
-                    prop="profit"
+                    width='110px'
+                    prop="raw_output"
+                    label='产出估算'>
+                </el-table-column>
+                <el-table-column
+                    width='110px'
+                    prop="real_output"
+                    label='账户产出'>
+                </el-table-column>
+                <el-table-column
+                    width='110px'
+                    prop="real_output_from_cibuluo"
+                    label='朋友圈收益'>
+                </el-table-column>
+                <el-table-column
+                    width='110px'
+                    prop="raw_profit"
                     label='收益'>
+                </el-table-column>
+                <el-table-column
+                    width='110px'
+                    prop="profit"
+                    label='分红'>
+                </el-table-column>
+                <el-table-column
+                    min-width='120'
+                    prop="device_name"
+                    label='包含设备'>
+                </el-table-column>
+                <el-table-column
+                    min-width='120'
+                    prop="remark"
+                    label='备注'>
                 </el-table-column>
             </el-table>
             <el-table
@@ -75,28 +129,32 @@
                 v-loading='laoding'
                 style="width: 100%;font-size: 14px;">
                 <el-table-column
-                    prop="sh_name"
+                    prop="month"
+                    label="月份">
+                </el-table-column>
+                <el-table-column
+                    prop="partner"
                     label="合伙人">
                 </el-table-column>
                 <el-table-column
-                    prop="sh_ratio"
-                    label="分红">
+                    prop="partner_ratio"
+                    label='分红比'>
                 </el-table-column>
                 <el-table-column
-                    prop="month"
-                    label='月份'>
+                    prop="partner_own_device_num"
+                    label='拥有设备数'>
                 </el-table-column>
                 <el-table-column
-                    prop="avg_promoted_customer"
-                    label='设备平均客户人数'>
-                </el-table-column>
-                <el-table-column
-                    prop="single_profit"
+                    prop="per_customer_profit"
                     label='单客收益'>
                 </el-table-column>
                 <el-table-column
-                    prop="partner_one_device_profit"
-                    label='单设备收益'>
+                    prop="per_device_customer"
+                    label='单设备客户数'>
+                </el-table-column>
+                <el-table-column
+                    prop="partner_profit"
+                    label='分红'>
                 </el-table-column>
             </el-table>
         </template>
@@ -118,13 +176,32 @@
                 laoding:false,
                 gs:null,
                 gd:null,
+                sh_info:[],
+                info_id:'',
+                total_cost:{}
             }
         },
         mounted: function () {
             this.month = new Date().getFullYear() + '-'+ (new Date().getMonth()+1);
             this.getprofits();
+            this.shinfo();
         },
         methods:{
+            shinfo: function () {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/sh_info',
+                    data:{
+                        token:vm.token,
+                        uid:vm.uid,
+                    }
+                })
+                    .then(function(res){
+                        vm.sh_info = res.data.data;
+                    })
+                    .catch(function(err){});
+            },
             getprofits: function () {
                 let vm = this;
                 vm.laoding = true;
@@ -134,7 +211,8 @@
                     data:{
                         token:vm.token,
                         uid:vm.uid,
-                        date:vm.month
+                        date:vm.month,
+                        sh_info:vm.info_id
                     }
                 })
                    .then(function(res){
@@ -143,6 +221,7 @@
                            vm.type = 1;
                            vm.tableData = res.data.data.shareholders;
                            vm.tableData1 = res.data.data.partners;
+                           vm.total_cost = res.data.total_cost
                            let a1=0,a2=0;
                            for(let i = 0 ,len = vm.tableData.length ; i < len; i++){
                                if(vm.tableData[i].sh_name=='公司'){
@@ -151,7 +230,6 @@
                                    a2 = a2 + vm.tableData[i].profit
                                }
                            }
-                           console.log(a1,a2);
                            vm.gs = a1.toFixed(2);
                            vm.gd = a2.toFixed(2);
                        }else {

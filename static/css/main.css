@@ -180,7 +180,7 @@ a {
     margin-right: 4px;
 }
 .my_wap{
-    width: 100%;
+    min-width: 1300px;
     height: 100%;
     overflow: auto !important;
     background-color: #ffffff;

@@ -15,6 +15,16 @@
                     <div><span>备注</span><p><input type="text" v-model="dataInfo.remark"></p></div>
                     <div><span>序号</span><p><input type="text" v-model="dataInfo.sequence" class='dis' disabled></p></div>
                 </div>
+                <div class="head2">
+                    <el-select v-model="dataInfo.is_promot" placeholder="推广状态">
+                        <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </div>
             </div>
             <div class="head-r">
                 <template>
@@ -111,9 +121,17 @@
                 loading: false,
                 dataInfo: {
                     sequence: '',
+                    is_promot:'',
                 },
                 revise: true,
                 radio: 1,
+                options: [{
+                    value: '完成推广',
+                    label: '完成推广'
+                }, {
+                    value: '正在推广中',
+                    label: '正在推广中'
+                }],
             }
         },
         mounted: function () {
@@ -177,6 +195,7 @@
                 let vm = this;
                 if (!vm.dataInfo.device || !vm.dataInfo.account) {
                     vm.$message.warning('设备和账号为必填项');
+                    return false;
                 } else {
                     let data = vm.dataInfo;
                     data.token = vm.token;

@@ -32,29 +32,31 @@
                         label="名称">
                     </el-table-column>
                     <!--<el-table-column-->
-                        <!--prop="password"-->
-                        <!--label="密码">-->
+                    <!--prop="password"-->
+                    <!--label="密码">-->
                     <!--</el-table-column>-->
                     <el-table-column
                         prop="devices_num"
                         label='总设备数'>
                     </el-table-column>
-                    <!--<el-table-column-->
-                        <!--prop="need_storage"-->
-                        <!--label='应存备用金'>-->
-                    <!--</el-table-column>-->
-                    <!--<el-table-column-->
-                        <!--prop="already_storage"-->
-                        <!--label='已存备用金'>-->
-                    <!--</el-table-column>-->
                     <el-table-column
                         prop="sh_percent"
                         label='分红'>
                     </el-table-column>
                     <el-table-column
+                        prop="logic_reserve"
+                        label='需存备用金'>
+                    </el-table-column>
+                    <el-table-column
+                        prop="real_reserve"
+                        label='已存备用金'>
+                    </el-table-column>
+                    <el-table-column
                         label='操作'>
                         <template slot-scope='scope'>
-                            <el-button type="info" plain @click='setinfo(scope.row["id"])' size="mini">查看详情</el-button>
+                            <el-button type="info" plain @click='setinfo(scope.row["id"],scope.row["real_reserve"],scope.row["sh_percent"])'
+                                       size="mini">查看详情
+                            </el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -62,21 +64,20 @@
             <template v-else-if='radio2 == 2'>
                 <template>
                     <div class='i_box'>
-                        <el-button type="primary" icon="el-icon-circle-plus-outline" size="mini" @click='adddev'>添加设备</el-button>
+                        <div class='box_l'>
+                            <el-button type="primary" size="mini" @click='adddev'>添加设备</el-button>
+                            <div class='box_l_l'>
+                                <el-input placeholder="请输入内容" v-model="realreserve" style='width: 240px;'>
+                                    <template slot="prepend">已存备用金</template>
+                                </el-input>
+                                <el-input placeholder="请输入内容" v-model="remark" style='width: 400px;'>
+                                    <template slot="prepend">备注</template>
+                                </el-input>
+                                <el-button type="primary" size="mini" @click='torealreserve'>确认修改</el-button>
+                            </div>
+                        </div>
                         <i class="fontfamily te-oa-chehuisekuai back" @click='back()'></i>
                     </div>
-                    <!--<div class="pro_add_user" style='margin-bottom: 10px;'>-->
-                        <!--<p>-->
-                            <!--<span style='margin-right: 8px;color: #999999;'>设置股东名称:</span>-->
-                            <!--<el-input v-model="reUser.shareholders" size="mini"-->
-                                      <!--style='width: 160px;margin-right: 20px;'></el-input>-->
-                            <!--<span style='margin-right: 8px;color: #999999;'>设置密码:</span>-->
-                            <!--<el-input v-model="reUser.shareholderspassword" size="mini" style='width: 160px'></el-input>-->
-                        <!--</p>-->
-                        <!--<span style='display: block;margin-left: 40px;'>-->
-                            <!--<el-tag class="my_tag" size='medium'>修改信息</el-tag>-->
-                        <!--</span>-->
-                    <!--</div>-->
                     <template v-loading='loading'>
                         <el-table
                             :data="devicelist"
@@ -131,7 +132,7 @@
                             <el-table-column
                                 label="操作">
                                 <template slot-scope='scope'>
-                                    <span @click='delDev(scope.row.eid)' class='sp'>删除设备</span>
+                                    <span @click='confirmDel(scope.row.eid)' class='sp'>删除设备</span>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -159,6 +160,7 @@
             </el-table>
         </template>
         <template v-else-if='radio == 3'>
+            <el-button @click='reckon' style='margin-bottom: 8px;' v-loading='reckonloading'>计算收益</el-button>
             <div class="function">
                 <el-date-picker
                     v-model="newData.month"
@@ -183,6 +185,7 @@
             <el-table
                 :data="cost_record"
                 height="80%"
+                @row-click='rowclick'
                 style="width: 100%;font-size: 14px;">
                 <el-table-column
                     prop="month"
@@ -203,7 +206,9 @@
             </el-table>
         </template>
         <div class="adddevisebox" v-show='adddevisebox'>
-            <p><el-button type="primary" plain size='mini' @click='btn_adddev'>添加</el-button><i class="el-icon-error" @click='celadddevisebox' style='color: #666666;'></i></p>
+            <p>
+                <el-button type="primary" plain size='mini' @click='btn_adddev'>添加</el-button>
+                <i class="el-icon-error" @click='celadddevisebox' style='color: #666666;'></i></p>
             <template v-loading='getdevlistloading'>
                 <el-table
                     :data="deviceList"
@@ -269,13 +274,13 @@
             return {
                 token: sessionStorage.getItem('token'),
                 uid: sessionStorage.getItem('uid'),
-                id:null,
+                id: null,
                 radio: '1',
                 radio2: '1',
                 loading: false,
-                adddevisebox:false,
-                getdevlistloading:false,
-                deviceList:[],
+                adddevisebox: false,
+                getdevlistloading: false,
+                deviceList: [],
                 addUser: {
                     shareholders: '',
                     shareholderspassword: '',
@@ -285,22 +290,24 @@
                     shareholderspassword: '',
                 },
                 shareholder_list: [],
-                cost_record:[],
-                partner_list:[],
-                tableData1: [
-
-                ],
+                cost_record: [],
+                partner_list: [],
+                tableData1: [],
                 newData: {
                     month: '',
                     cost_manpower: 0,
                     cost_device: 0,
                     cost_rent: 0,
                     cost_id: '',
-                    cost_all:0
+                    cost_all: 0
                 },
                 devicelist: [],
-                selectNb:[],
-                addloading:false,
+                selectNb: [],
+                addloading: false,
+                realreserve: '',
+                sh_percent: '',
+                remark: '',
+                reckonloading:false,
             }
         },
         mounted: function () {
@@ -316,22 +323,22 @@
             getshareholderslist: function () {
                 let vm = this;
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api+'/oa/profits2',
-                    data:{
-                        token:vm.token,
-                        uid:vm.uid,
+                    method: 'post',
+                    url: window.$g_Api + '/oa/profits2',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
                     }
                 })
-                   .then(function(res){
-                       if(res.data.code == 0){
-                           vm.shareholder_list = res.data.data.shareholder_list;
-                           vm.partner_list = res.data.data.partner_list;
-                           vm.cost_record = res.data.data.cost_record;
-                       }
-                       vm.$message.success(res.data.message);
-                   })
-                   .catch(function(err){});
+                    .then(function (res) {
+                        if (res.data.code == 0) {
+                            vm.shareholder_list = res.data.data.shareholder_list;
+                            vm.partner_list = res.data.data.partner_list;
+                            vm.cost_record = res.data.data.cost_record;
+                        }
+                    })
+                    .catch(function (err) {
+                    });
             },
             //返回
             back: function () {
@@ -339,29 +346,32 @@
                 this.getshareholderslist();
             },
             //查看股东设备详情
-            setinfo: function (id) {
-                let vm  = this;
+            setinfo: function (id, realreserve,sh_percent) {
+                let vm = this;
                 vm.id = id;
+                vm.realreserve = realreserve;
+                vm.sh_percent = sh_percent;
                 vm.radio2 = '2';
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api + '/oa/owndevices',
-                    data:{
-                        token:vm.token,
-                        uid:vm.uid,
-                        id:id
+                    method: 'post',
+                    url: window.$g_Api + '/oa/owndevices',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
+                        id: id
                     }
                 })
-                   .then(function(res){
-                       vm.devicelist = res.data.data;
-                   })
-                   .catch(function(err){});
+                    .then(function (res) {
+                        vm.devicelist = res.data.data;
+                    })
+                    .catch(function (err) {
+                    });
             },
             //点击新增弹出设备列表
             adddev: function () {
-              let vm = this;
-              vm.adddevisebox = true;
-              vm.getdevlist();
+                let vm = this;
+                vm.adddevisebox = true;
+                vm.getdevlist();
             },
             //关闭新增设备遮罩
             celadddevisebox: function () {
@@ -373,121 +383,211 @@
                 vm.getdevlistloading = true;
                 vm.addloading = true;
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api+'/oa/devices1',
-                    data:{
-                        token:vm.token,
-                        uid:vm.uid,
+                    method: 'post',
+                    url: window.$g_Api + '/oa/devices1',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
                     }
                 })
-                    .then(function(res){
+                    .then(function (res) {
                         vm.getdevlistloading = false;
                         vm.addloading = false;
-                        if(res.data.code == 0){
-                            vm.deviceList = res.data.data;
-                        }else {
+                        if (res.data.code == 0) {
+                            let arr = [];
+                            let devarr = res.data.data;
+                            for(let i = 0 ,len = devarr.length ; i < len; i++){
+                                if(devarr[i].is_distributed == 0){
+                                    arr.push(devarr[i])
+                                }else {
+                                    continue;
+                                }
+                            }
+                            vm.deviceList = devarr;
+                        } else {
                             console.error(res.data.message);
                         }
                     })
-                    .catch(function(err){vm.getdevlistloading = false;});
+                    .catch(function (err) {
+                        vm.getdevlistloading = false;
+                    });
             },
             //多选框事件
             handleSelectionChange(val) {
+                console.log(val);
                 let arr = [];
-                for(let i = 0 ,len = val.length ; i < len; i++){
+                for (let i = 0, len = val.length; i < len; i++) {
                     arr.push(val[i].id);
                 }
                 this.selectNb = arr;
             },
             //确认添加设备
-            btn_adddev:function () {
+            btn_adddev: function () {
                 let vm = this;
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api+'/oa/holder/adddevice',
-                    data:{
-                        token:vm.token,
-                        uid:vm.uid,
-                        id:vm.id,
-                        eids:vm.selectNb
+                    method: 'post',
+                    url: window.$g_Api + '/oa/holder/adddevice',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
+                        id: vm.id,
+                        eids: vm.selectNb
                     }
                 })
-                   .then(function(res){
-                       vm.$alert(res.data.message);
-                       vm.adddevisebox = false;
-                       vm.radio2 = '2';
-                       vm.$axios({
-                           method:'post',
-                           url:window.$g_Api + '/oa/owndevices',
-                           data:{
-                               token:vm.token,
-                               uid:vm.uid,
-                               id:vm.id
-                           }
-                       })
-                           .then(function(res){
-                               vm.devicelist = res.data.data;
-                           })
-                           .catch(function(err){});
-                   })
-                   .catch(function(err){});
+                    .then(function (res) {
+                        vm.$alert(res.data.message);
+                        vm.adddevisebox = false;
+                        vm.radio2 = '2';
+                        vm.$axios({
+                            method: 'post',
+                            url: window.$g_Api + '/oa/owndevices',
+                            data: {
+                                token: vm.token,
+                                uid: vm.uid,
+                                id: vm.id
+                            }
+                        })
+                            .then(function (res) {
+                                vm.devicelist = res.data.data;
+                            })
+                            .catch(function (err) {
+                            });
+                    })
+                    .catch(function (err) {
+                    });
             },
-            //删除设备
-            delDev: function (eid) {
+            //确认是否删除
+            confirmDel: function (eid) {
                 let vm = this;
-                vm.$axios({
-                    method:'post',
-                    url:window.$g_Api+'/oa/holder/deldevice',
-                    data:{
-                        token:vm.token,
-                        uid:vm.uid,
-                        id:vm.id,
-                        eids:eid
-                    }
-                })
-                   .then(function(res){
-                       vm.$alert(res.data.message);
-                       vm.$axios({
-                           method:'post',
-                           url:window.$g_Api + '/oa/owndevices',
-                           data:{
-                               token:vm.token,
-                               uid:vm.uid,
-                               id:vm.id
-                           }
-                       })
-                           .then(function(res){
-                               vm.devicelist = res.data.data;
-                           })
-                           .catch(function(err){});
-                   })
-                   .catch(function(err){});
+                vm.$confirm('此操作将设备从该股东所属中移除, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    vm.$axios({
+                        method: 'post',
+                        url: window.$g_Api + '/oa/holder/deldevice',
+                        data: {
+                            token: vm.token,
+                            uid: vm.uid,
+                            id: vm.id,
+                            eids: eid
+                        }
+                    })
+                        .then(function (res) {
+                            vm.$alert(res.data.message);
+                            vm.$axios({
+                                method: 'post',
+                                url: window.$g_Api + '/oa/owndevices',
+                                data: {
+                                    token: vm.token,
+                                    uid: vm.uid,
+                                    id: vm.id
+                                }
+                            })
+                                .then(function (res) {
+                                    if(res.data.code){
+                                        vm.$message({
+                                            type: 'success',
+                                            message: '删除成功!'
+                                        });
+                                    }
+                                    vm.devicelist = res.data.data;
+                                })
+                                .catch(function (err) {
+                                });
+                        })
+                        .catch(function (err) {
+                        });
+                }).catch(() => {
+                    vm.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            //点击行修改
+            rowclick: function (row) {
+                this.newData = row;
+                this.newData.cost_manpower = row.employee_wages;
             },
             //新增或修改成本
             costInof: function () {
                 let vm = this;
                 let type;
-                vm.newData.cost_id?type=1:type=0;
+                vm.newData.cost_id ? type = 1 : type = 0;
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api+'/oa/holder/add_cost',
-                    data:{
-                        token:vm.token,
-                        uid:vm.uid,
-                        month:vm.newData.month,
+                    method: 'post',
+                    url: window.$g_Api + '/oa/holder/add_cost',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
+                        month: vm.newData.month,
                         cost_manpower: vm.newData.cost_manpower,
                         cost_rent: vm.newData.cost_rent,
                         cost_device: vm.newData.cost_device,
                         cost_id: vm.newData.cost_id,
-                        type:type,
+                        type: type,
                     }
                 })
-                   .then(function(res){})
-                   .catch(function(err){});
+                    .then(function (res) {
+                        if (res.data.code == 0) {
+                            vm.$message.success(res.data.message)
+                        } else {
+                            vm.$message.error(res.data.message)
+                        }
+                    })
+                    .catch(function (err) {
+                    });
             },
             //计算总和
             getall: function () {
                 this.newData.cost_all = Number(this.newData.cost_rent) + Number(this.newData.cost_device) + Number(this.newData.cost_manpower);
+            },
+            //计算收益
+            reckon: function () {
+                let vm = this;
+                vm.reckonloading = true;
+                vm.$axios({
+                    method: 'post',
+                    url: window.$g_Api + '/oa/calculate_profits',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
+                        request_month: vm.newData.month
+                    }
+                })
+                    .then(function (res) {
+                        vm.reckonloading = false;
+                    })
+                    .catch(function (err) {
+                    });
+            },
+            //修改备用金
+            torealreserve: function () {
+                let vm = this;
+                vm.$axios({
+                    method: 'post',
+                    url: window.$g_Api + '/oa/profits2/edit_real_reserve',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
+                        sh_id: vm.id,
+                        real_reserve: vm.realreserve,
+                        remark: vm.remark,
+                        ratio:vm.sh_percent
+                    }
+                })
+                    .then(function (res) {
+                        if (res.data.code == 0) {
+                            vm.$message.success(res.data.message)
+                        } else {
+                            vm.$message.error(res.data.message)
+                        }
+                        vm.getshareholderslist();
+                    })
+                    .catch(function (err) {
+                    });
             }
         }
     }
@@ -496,6 +596,7 @@
 <style lang="scss" type="text/scss" scoped>
     #profits2 {
         position: relative;
+        min-width: 1300px;
         .profitsBox {
             margin-bottom: 15px;
             span {
@@ -518,17 +619,28 @@
         }
         .i_box {
             width: 100%;
-            /*height: 24px;*/
+            height: 32px;
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
+            flex-wrap: nowrap;
             .back {
                 display: block;
+                width: 24px;
                 color: #409EFF;
                 font-size: 24px;
                 margin-right: 30px;
                 &:hover {
                     cursor: pointer;
+                }
+            }
+            .box_l {
+                display: flex;
+                flex:1;
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+                .box_l_l {
+                    margin-left: 30px;
                 }
             }
         }
@@ -546,31 +658,31 @@
             justify-content: flex-start;
             padding-left: 10px;
         }
-        .adddevisebox{
+        .adddevisebox {
             width: 100%;
             height: 100%;
             padding: 0 20px;
-            background-color:rgb(255,255,255);
+            background-color: rgb(255, 255, 255);
             position: absolute;
             top: 0;
             left: 0;
             z-index: 8888;
-            p{
+            p {
                 width: 100%;
                 height: 32px;
                 margin: 15px 0;
-                i{
+                i {
                     float: right;
                     font-size: 24px;
-                    &:hover{
+                    &:hover {
                         cursor: pointer;
                     }
                 }
             }
         }
-        .sp{
-            color:red;
-            &:hover{
+        .sp {
+            color: red;
+            &:hover {
                 cursor: pointer;
             }
         }
