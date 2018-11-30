@@ -77,8 +77,9 @@
                         <el-checkbox v-model="power.manage">用户管理(操作)</el-checkbox>
                         <el-checkbox v-model="power.operationlog">操作日志(操作)</el-checkbox>
                         <el-checkbox v-model="power.groupmanagement">分组管理(操作)</el-checkbox>
+                        <el-checkbox v-model="power.check_order">订单查询(操作)</el-checkbox>
+                        <el-checkbox v-model="power.devicestate">设备推广(操作)</el-checkbox>
                         <el-checkbox v-model="power.order2">订单比(操作)</el-checkbox>
-                        <el-checkbox v-model="power.check_order">订单比(操作)</el-checkbox>
                     </template>
                 </p>
             </div>
@@ -163,6 +164,7 @@
                         check_order: false,//操作日志
                         groupdata: false,//操作日志
                         groupmanagement: false,//操作日志
+                        devicestate: false,//操作日志
                     }
                     vm.username='';
                     vm.password='';

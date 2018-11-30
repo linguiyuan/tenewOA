@@ -574,7 +574,7 @@
             adddata: function () {
                 let vm = this;
                 vm.myload = true;
-                if (!vm.setInfo.name || !vm.setInfo.date || !vm.setInfo.item || !vm.setInfo.score) {
+                if (!vm.setInfo.name || !vm.setInfo.date || !vm.setInfo.item) {
                     vm.$message.error('亲!除了备注其余都是必填项哦~~');
                     return false
                 }

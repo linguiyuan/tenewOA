@@ -30,97 +30,276 @@
         <p v-if='type == 1' style='width: 100%;margin-bottom: 10px;'>
             <span>公司总收益:<i style='margin-left: 8px;color:#E6A23C;'>{{gs}}</i> </span>
             <span style="margin-left: 20px;">股东总分红:<i style='margin-left: 8px;color:#E6A23C;'>{{gd}}</i></span>
-            <span style="margin-left: 20px;">设备总成本:<i style='margin-left: 8px;color:#E6A23C;'>{{total_cost.device_cost}}</i></span>
+            <span style="margin-left: 20px;">设备总成本:<i
+                style='margin-left: 8px;color:#E6A23C;'>{{total_cost.device_cost}}</i></span>
             <span style="margin-left: 20px;">人工总成本:<i style='margin-left: 8px;color:#E6A23C;'>{{total_cost.employee_wages}}</i></span>
-            <span style="margin-left: 20px;">场地总成本:<i style='margin-left: 8px;color:#E6A23C;'>{{total_cost.rent}}</i></span>
+            <span style="margin-left: 20px;">场地总成本:<i
+                style='margin-left: 8px;color:#E6A23C;'>{{total_cost.rent}}</i></span>
         </p>
         <template>
+            <!--<el-table-->
+            <!--v-if='type == 1'-->
+            <!--:data="tableData"-->
+            <!--height="80%"-->
+            <!--key='shareholders'-->
+            <!--v-loading='laoding'-->
+            <!--style="font-size: 14px;">-->
+            <!--<el-table-column-->
+            <!--fixed-->
+            <!--prop="request_month"-->
+            <!--width='100px'-->
+            <!--label='月份'>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--fixed-->
+            <!--width='120px'-->
+            <!--prop="account_name"-->
+            <!--label="账户名">-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--fixed-->
+            <!--width='100px'-->
+            <!--prop="belong_to_whom"-->
+            <!--label="所属">-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--fixed-->
+            <!--width='80px'-->
+            <!--prop="belong_to_whom_ratio"-->
+            <!--label="分红比">-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--min-width='120'-->
+            <!--prop="device_name"-->
+            <!--label='包含设备'>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='110px'-->
+            <!--prop="real_output_from_cibuluo"-->
+            <!--label='朋友圈红利'>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='110px'-->
+            <!--prop="raw_output"-->
+            <!--label='产出估算'>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='110px'-->
+            <!--prop="cost_payment"-->
+            <!--label='提现成本'>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='110px'-->
+            <!--prop="real_output"-->
+            <!--label='实际产出'>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='180px'-->
+            <!--style='background-color: red;'-->
+            <!--prop="cost_man_power_base_customer"-->
+            <!--label='人工成本（客户核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.cost_man_power_base_customer}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='210px'-->
+            <!--prop="cost_device_base_customer"-->
+            <!--label='技术维护成本（客户核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.cost_device_base_customer}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='180px'-->
+            <!--prop="raw_device_profit_base_customer"-->
+            <!--label='基本红利（客户核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.raw_device_profit_base_customer}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='180px'-->
+            <!--prop="raw_profit_base_customer"-->
+            <!--label='账户红利（客户核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.raw_profit_base_customer}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='180px'-->
+            <!--prop="profit_base_customer"-->
+            <!--label='账户分红（客户核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.profit_base_customer}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='180px'-->
+            <!--prop="cost_man_power_base_device"-->
+            <!--label='人工成本（设备核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.cost_man_power_base_device}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='210px'-->
+            <!--prop="cost_device_base_device"-->
+            <!--label='技术维护成本（设备核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.cost_device_base_device}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='180px'-->
+            <!--prop="raw_device_profit_base_device"-->
+            <!--label='基本红利（设备核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.raw_device_profit_base_device}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='180px'-->
+            <!--prop="raw_profit_base_device"-->
+            <!--label='账户红利（设备核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.raw_profit_base_device}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--width='180px'-->
+            <!--prop="profit_base_device"-->
+            <!--label='账户分红（设备核算法）'>-->
+            <!--<template slot-scope='scope'>-->
+            <!--<span class='bgc_red'>{{scope.row.profit_base_device}}</span>-->
+            <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--prop="avg_profit"-->
+            <!--label='综合分红'>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+            <!--min-width='120'-->
+            <!--prop="remark"-->
+            <!--label='备注'>-->
+            <!--</el-table-column>-->
+            <!--</el-table>-->
+
+
             <el-table
                 v-if='type == 1'
                 :data="tableData"
                 height="80%"
                 key='shareholders'
                 v-loading='laoding'
-                style="font-size: 14px;">
+                style="font-size: 14px;width: 100%">
+                <el-table-column type="expand">
+                    <template slot-scope="scope">
+                        <el-form label-position="left" inline class="demo-table-expand">
+                            <el-form-item
+                                label='人工成本（客户核算法）:'>
+                                    <span class='bgc_red'>{{scope.row.cost_man_power_base_customer}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='人工成本（设备核算法）:'>
+                                <span class='bgc_red'>{{scope.row.cost_man_power_base_device}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='基本红利（客户核算法）:'>
+                                    <span class='bgc_red'>{{scope.row.raw_device_profit_base_customer}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='基本红利（设备核算法）:'>
+                                <span class='bgc_red'>{{scope.row.raw_device_profit_base_device}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='账户红利（客户核算法）:'>
+                                    <span class='bgc_red'>{{scope.row.raw_profit_base_customer}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='账户红利（设备核算法）:'>
+                                <span class='bgc_red'>{{scope.row.raw_profit_base_device}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='账户分红（客户核算法）:'>
+                                    <span class='bgc_red'>{{scope.row.profit_base_customer}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='账户分红（设备核算法）:'>
+                                    <span class='bgc_red'>{{scope.row.profit_base_device}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='技术维护成本（客户核算法）:'>
+                                <span class='bgc_red'>{{scope.row.cost_device_base_customer}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                label='技术维护成本（设备核算法）:'>
+                                <span class='bgc_red'>{{scope.row.cost_device_base_device}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                style='width: 100%'
+                                label='包含设备:'>
+                                <span>{{scope.row.device_name}}</span>
+                            </el-form-item>
+                            <el-form-item
+                                style='width: 100%'
+                                label='备注:'>
+                                <span>{{scope.row.remark}}</span>
+                            </el-form-item>
+                        </el-form>
+                    </template>
+                </el-table-column>
+
+
                 <el-table-column
-                    fixed
                     prop="request_month"
-                    width='100px'
                     label='月份'>
                 </el-table-column>
                 <el-table-column
-                    fixed
-                    width='100px'
-                    prop="belong_to_whom"
-                    label="所属">
-                </el-table-column>
-                <el-table-column
-                    fixed
-                    width='120px'
                     prop="account_name"
                     label="账户名">
+                </el-table-column>
+                <el-table-column
+                    width='80px'
+                    prop="belong_to_whom"
+                    label="所属">
                 </el-table-column>
                 <el-table-column
                     width='80px'
                     prop="belong_to_whom_ratio"
                     label="分红比">
                 </el-table-column>
+                <!--<el-table-column-->
+                    <!--prop="device_name"-->
+                    <!--label='包含设备'>-->
+                <!--</el-table-column>-->
                 <el-table-column
-                    width='110px'
-                    prop="cost_device"
-                    label='设备成本'>
+                    prop="real_output_from_cibuluo"
+                    label='朋友圈红利'>
                 </el-table-column>
                 <el-table-column
-                    width='110px'
-                    prop="cost_man_power"
-                    label='人工成本'>
-                </el-table-column>
-                <el-table-column
-                    width='110px'
-                    prop="cost_payment"
-                    label='提现成本'>
-                </el-table-column>
-                <el-table-column
-                    width='110px'
-                    prop="cost_rent"
-                    label='场地成本'>
-                </el-table-column>
-                <el-table-column
-                    width='110px'
                     prop="raw_output"
                     label='产出估算'>
                 </el-table-column>
                 <el-table-column
-                    width='110px'
+                    prop="cost_payment"
+                    label='提现成本'>
+                </el-table-column>
+                <el-table-column
                     prop="real_output"
-                    label='账户产出'>
+                    label='实际产出'>
                 </el-table-column>
                 <el-table-column
-                    width='110px'
-                    prop="real_output_from_cibuluo"
-                    label='朋友圈收益'>
+                    prop="avg_profit"
+                    label='综合分红'>
                 </el-table-column>
-                <el-table-column
-                    width='110px'
-                    prop="raw_profit"
-                    label='收益'>
-                </el-table-column>
-                <el-table-column
-                    width='110px'
-                    prop="profit"
-                    label='分红'>
-                </el-table-column>
-                <el-table-column
-                    min-width='120'
-                    prop="device_name"
-                    label='包含设备'>
-                </el-table-column>
-                <el-table-column
-                    min-width='120'
-                    prop="remark"
-                    label='备注'>
-                </el-table-column>
+                <!--<el-table-column-->
+                    <!--min-width='120'-->
+                    <!--prop="remark"-->
+                    <!--label='备注'>-->
+                <!--</el-table-column>-->
             </el-table>
+
             <el-table
                 v-else-if='type == 2'
                 :data="tableData1"
@@ -168,81 +347,83 @@
             return {
                 token: sessionStorage.getItem('token'),
                 uid: sessionStorage.getItem('uid'),
-                type:3,
-                show:false,
-                month:'',
-                tableData:[],
-                tableData1:[],
-                laoding:false,
-                gs:null,
-                gd:null,
-                sh_info:[],
-                info_id:'',
-                total_cost:{}
+                type: 3,
+                show: false,
+                month: '',
+                tableData: [],
+                tableData1: [],
+                laoding: false,
+                gs: null,
+                gd: null,
+                sh_info: [],
+                info_id: '',
+                total_cost: {}
             }
         },
         mounted: function () {
-            this.month = new Date().getFullYear() + '-'+ (new Date().getMonth()+1);
+            this.month = new Date().getFullYear() + '-' + (new Date().getMonth() + 1);
             this.getprofits();
             this.shinfo();
         },
-        methods:{
+        methods: {
             shinfo: function () {
                 let vm = this;
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api+'/oa/sh_info',
-                    data:{
-                        token:vm.token,
-                        uid:vm.uid,
+                    method: 'post',
+                    url: window.$g_Api + '/oa/sh_info',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
                     }
                 })
-                    .then(function(res){
+                    .then(function (res) {
                         vm.sh_info = res.data.data;
                     })
-                    .catch(function(err){});
+                    .catch(function (err) {
+                    });
             },
             getprofits: function () {
                 let vm = this;
                 vm.laoding = true;
                 vm.$axios({
-                    method:'post',
-                    url:window.$g_Api+'/oa/profits1',
-                    data:{
-                        token:vm.token,
-                        uid:vm.uid,
-                        date:vm.month,
-                        sh_info:vm.info_id
+                    method: 'post',
+                    url: window.$g_Api + '/oa/profits1',
+                    data: {
+                        token: vm.token,
+                        uid: vm.uid,
+                        date: vm.month,
+                        sh_info: vm.info_id
                     }
                 })
-                   .then(function(res){
-                       if(res.data.type == 0){
-                           vm.show = true;
-                           vm.type = 1;
-                           vm.tableData = res.data.data.shareholders;
-                           vm.tableData1 = res.data.data.partners;
-                           vm.total_cost = res.data.total_cost
-                           let a1=0,a2=0;
-                           for(let i = 0 ,len = vm.tableData.length ; i < len; i++){
-                               if(vm.tableData[i].sh_name=='公司'){
-                                   a1 = a1 + vm.tableData[i].profit
-                               }else{
-                                   a2 = a2 + vm.tableData[i].profit
-                               }
-                           }
-                           vm.gs = a1.toFixed(2);
-                           vm.gd = a2.toFixed(2);
-                       }else {
-                           vm.type = res.data.type;
-                           if(res.data.type == 1){
-                               vm.tableData = res.data.data;
-                           }else if(res.data.type == 2){
-                               vm.tableData1 = res.data.data;
-                           }
-                       }
-                       vm.laoding = false;
-                   })
-                   .catch(function(err){});
+                    .then(function (res) {
+                        if (res.data.type == 0) {
+                            vm.show = true;
+                            vm.type = 1;
+                            vm.tableData = res.data.data.shareholders;
+                            vm.tableData1 = res.data.data.partners;
+                            vm.total_cost = res.data.total_cost
+                            let a1 = 0, a2 = 0;
+                            for (let i = 0, len = vm.tableData.length; i < len; i++) {
+                                if (vm.tableData[i].sh_name == '公司') {
+                                    a1 = a1 + vm.tableData[i].avg_profit
+                                } else {
+                                    a2 = a2 + vm.tableData[i].avg_profit
+                                }
+                            }
+                            vm.gs = a1.toFixed(2);
+                            vm.gd = a2.toFixed(2);
+                        } else {
+                            vm.type = res.data.type;
+                            if (res.data.type == 1) {
+                                vm.tableData = res.data.data;
+                            } else if (res.data.type == 2) {
+                                vm.tableData1 = res.data.data;
+                            }
+                        }
+                        vm.laoding = false;
+                    })
+                    .catch(function (err) {
+                    });
             }
         }
     }
@@ -254,6 +435,21 @@
             display: flex;
             justify-content: flex-start;
             margin-bottom: 20px;
+        }
+        .bgc_red {
+            background-color: #fef0f0;
+        }
+        .demo-table-expand {
+            font-size: 0;
+        }
+        .demo-table-expand label {
+            width: 90px;
+            color: #99a9bf;
+        }
+        .demo-table-expand .el-form-item {
+            margin-right: 0;
+            margin-bottom: 0;
+            width: 50%;
         }
     }
 </style>

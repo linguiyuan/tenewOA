@@ -110,6 +110,11 @@ export default new Router({
                     meta: { title: '用户中心'}
                 },
                 {
+                    path: '/devicestate',
+                    component: resolve => require(['../components/page/operData/devicestate.vue'], resolve),
+                    meta: { title: '设备推广'}
+                },
+                {
                     // 权限页面
                     path: '/manage',
                     component: resolve => require(['../components/page/manage.vue'], resolve),

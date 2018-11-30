@@ -9,12 +9,14 @@
                             <i :class="item.icon" style='color: rgb(191, 203, 217);margin-right: 4px;'></i><span slot="title">{{ item.title }}</span>
                         </template>
                         <el-menu-item v-for="(subItem,i) in item.subs" :key="i" :index="subItem.index" v-show='subItem.power'>
+                        <!--<el-menu-item v-for="(subItem,i) in item.subs" :key="i" :index="subItem.index">-->
                             {{ subItem.title }}
                         </el-menu-item>
                     </el-submenu>
                 </template>
                 <template v-else>
                     <el-menu-item :index="item.index" :key="item.index" v-show='item.power'>
+                    <!--<el-menu-item :index="item.index" :key="item.index">-->
                         <i :class="item.icon" style='color: rgb(191, 203, 217);margin-right: 4px;'></i><span slot="title">{{ item.title }}</span>
                     </el-menu-item>
                 </template>
@@ -141,10 +143,14 @@
 
                         },
                         {
+                            index: 'devicestate',
+                            title: '设备推广',
+                            power: power.devicestate,
+                        },
+                        {
                             index: 'groupmanagement',
                             title: '分组管理',
                             power: power.groupmanagement,
-
                         },
                     ]
                 },
