@@ -1,18 +1,21 @@
 <template>
     <div class="login-wrap">
-        <div class="ms-title">铁牛时代订单管理系统</div>
-        <div class='ms-login' v-loading="loading">
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="demo-ruleForm">
-                <el-form-item prop="username">
-                    <el-input v-model="ruleForm.username" placeholder="username"></el-input>
-                </el-form-item>
-                <el-form-item prop="password">
-                    <el-input type="password" placeholder="password" v-model="ruleForm.password" @keyup.enter.native="submitForm('ruleForm')"></el-input>
-                </el-form-item>
-                <div class="login-btn">
-                    <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
-                </div>
-            </el-form>
+        <div class="bgc_img"></div>
+        <div class="login_wrap_w">
+            <div class="ms-title">铁牛时代管理系统</div>
+            <div class='ms-login' v-loading="loading">
+                <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="demo-ruleForm">
+                    <el-form-item prop="username">
+                        <el-input v-model="ruleForm.username" placeholder="username"></el-input>
+                    </el-form-item>
+                    <el-form-item prop="password">
+                        <el-input type="password" placeholder="password" v-model="ruleForm.password" @keyup.enter.native="submitForm('ruleForm')"></el-input>
+                    </el-form-item>
+                    <div class="login-btn">
+                        <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
+                    </div>
+                </el-form>
+            </div>
         </div>
     </div>
 </template>
@@ -89,10 +92,30 @@
 
 <style lang='scss' scoped>
     .login-wrap{
+        position: relative;
         width:100%;
         height:100%;
         text-align: center;
         padding-top: 40px;
+        .login_wrap_w{
+            position: relative;
+            width:400px;
+            z-index: 888;
+            margin: 0 auto;
+            padding:30px 40px;
+            border-radius: 5px;
+            background-color: rgba(255,255,255,0.1);
+        }
+        .bgc_img{
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background:url("/static/img/92997fbe9b349c84861780424fb08765.gif") no-repeat center center;
+            background-size:cover;
+            opacity: 0.9;
+        }
     }
     .ms-title{
         text-align: center;
@@ -104,7 +127,6 @@
         width:300px;
         padding:30px 40px;
         border-radius: 5px;
-        background: #fff;
         margin: 0 auto;
     }
     .ti{

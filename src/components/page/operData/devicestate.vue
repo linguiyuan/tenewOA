@@ -25,25 +25,45 @@
                     :label="month+''">
                 </el-table-column>
                 <el-table-column
-                    fixed
-                    prop='total'
-                    label='总计'>
-                </el-table-column>
-                <el-table-column
                     v-for='item in days'
                     :key='item'
                     :label="item+'号'">
                     <template slot-scope="scope">
-                        <el-popover trigger="hover" placement="top">
-                            <p>{{ scope.row.data['i'+item]}}</p>
-                            <div slot="reference" class="name-wrapper">
-                                {{ scope.row.data['d'+item]}}
-                            </div>
-                        </el-popover>
+                        <span class='boxw' style='color: #67C23A;' v-if='scope.row.data["i"+item]=="推广完成"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.remark,scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
+                        <span class='boxw' style='color: #E6A23C;' v-else-if='scope.row.data["i"+item]=="推广中"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.remark,scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
+                        <span class='boxw' style='color: #F56C6C;' v-else-if='scope.row.data["i"+item]=="暂停推广"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.remark,scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
+                        <span class='boxw' v-else @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.remark,scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
                     </template>
                 </el-table-column>
             </el-table>
         </template>
+
+        <el-dialog title="修改设备状态" :visible.sync="dialogFormVisible" width='500px'>
+            <el-form :model="form" v-loading='loading'>
+                <el-form-item label="设备号" label-width="120px">
+                    <el-input v-model="form.name" style='width: 203px;' disabled></el-input>
+                </el-form-item>
+                <el-form-item label="日期" label-width="120px">
+                    <el-input v-model="form.date" style='width: 203px;' disabled></el-input>
+                </el-form-item>
+                <el-form-item label="状态" label-width="120px">
+                    <el-select v-model="form.state" placeholder="选择状态">
+                        <el-option label="推广完成" value="推广完成"></el-option>
+                        <el-option label="暂停推广" value="暂停推广"></el-option>
+                        <el-option label="推广中" value="推广中"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注" label-width="120px">
+                    <el-input type="textarea" v-model="form.remark" style='width: 203px;'></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="setstate">确 定</el-button>
+            </div>
+        </el-dialog>
+
+
     </div>
 </template>
 
@@ -52,19 +72,64 @@ export default{
     name:'devicestate',
     data: function () {
         return {
+            token: sessionStorage.getItem('token'),
+            uid: sessionStorage.getItem('uid'),
             month:'',
             days:[],
-            tableData:[
-                {}
-            ]
+            tableData:[],
+            dialogFormVisible:false,
+            form:{
+                state:''
+            },
+            loading:false
         }
     },
     mounted: function () {
         let vm = this;
         let date = new Date().getFullYear()+'-'+(new Date().getMonth()+1);
         this.month = date;
+        this.getdata();
     },
     methods:{
+        //打开设置box
+        showbox: function (name,day,state,remark,eid) {
+            console.log(eid);
+            this.dialogFormVisible = true;
+            day > 9?day=this.month+'-'+day:day=this.month+'-0'+day;
+            this.form.name=name;
+            this.form.date=day;
+            this.form.state =state;
+            this.form.remark =remark;
+            this.form.eid =eid;
+        },
+        //设置状态
+        setstate: function () {
+            let vm = this;
+            vm.loading = true;
+            console.log(vm.form.eid);
+            vm.$axios({
+                method:'post',
+                url:window.$g_Api+'/oa/set_device_state',
+                data:{
+                    token:vm.token,
+                    uid:vm.uid,
+                    date:vm.form.date,
+                    state:vm.form.state,
+                    remark:vm.form.remark,
+                    eid:vm.form.eid,
+                }
+            })
+               .then(function(res){
+                   vm.loading = false;
+                   if(res.data.code == 0){
+                       vm.getdata();
+                       vm.dialogFormVisible = false;
+                   }else {
+                       vm.$alert(res.data.message);
+                   }
+               })
+               .catch(function(err){});
+        },
         getdays: function (data) {
             let date = new Date(data);//构造当前日期对象
             let year = date.getFullYear();//获取年份
@@ -84,6 +149,23 @@ export default{
             }
             this.days = newdays;
         },
+        getdata: function () {
+            let vm = this;
+            vm.getdays(vm.month);
+            vm.$axios({
+                method:'post',
+                url:window.$g_Api+'/oa/devicestate',
+                data:{
+                    token:vm.token,
+                    uid:vm.uid,
+                    date:vm.month
+                }
+            })
+               .then(function(res){
+                   vm.tableData = res.data.data;
+               })
+               .catch(function(err){});
+        }
     }
 }
 </script>
@@ -94,6 +176,14 @@ export default{
         display: flex;
         justify-content: flex-start;
         margin-bottom: 20px;
+    }
+    .boxw{
+        display: block;
+        width: 80px;
+        height: 24px;
+        &:hover{
+            cursor: pointer;
+        }
     }
 }
 </style>
