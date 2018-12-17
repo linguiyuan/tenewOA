@@ -115,6 +115,11 @@ export default new Router({
                     meta: { title: '设备推广'}
                 },
                 {
+                    path: '/accountoutput',
+                    component: resolve => require(['../components/page/operData/accountoutput.vue'], resolve),
+                    meta: { title: '账号产出'}
+                },
+                {
                     // 权限页面
                     path: '/manage',
                     component: resolve => require(['../components/page/manage.vue'], resolve),

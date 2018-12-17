@@ -79,6 +79,7 @@
                         <el-checkbox v-model="power.groupmanagement">分组管理(操作)</el-checkbox>
                         <el-checkbox v-model="power.check_order">订单查询(操作)</el-checkbox>
                         <el-checkbox v-model="power.devicestate">设备推广(操作)</el-checkbox>
+                        <el-checkbox v-model="power.accountoutput">账号产出(操作)</el-checkbox>
                         <el-checkbox v-model="power.order2">订单比(操作)</el-checkbox>
                     </template>
                 </p>

@@ -44,12 +44,27 @@
                         label='分红'>
                     </el-table-column>
                     <el-table-column
-                        prop="logic_reserve"
                         label='需存备用金'>
+                        <template slot-scope="scope">
+                            <el-popover trigger="hover" placement="top">
+                                <p v-for='item in scope.row.logic_history' style='font-size: 12px;color: #909399;'><span style='margin-right: 20px;'>日期：{{item.month}}</span>金额：<span>{{item.logic_reserve}}</span></p>
+                                <div slot="reference" class="name-wrapper">
+                                    <el-tag size="medium">{{ scope.row.logic_reserve }}</el-tag>
+                                </div>
+                            </el-popover>
+                        </template>
                     </el-table-column>
                     <el-table-column
                         prop="real_reserve"
                         label='已存备用金'>
+                        <template slot-scope="scope">
+                            <el-popover trigger="hover" placement="top">
+                                <p v-for='item in scope.row.real_history' style='font-size: 12px;color: #909399;'><span style='margin-right: 20px;'>时间：{{item.edit_time}}</span>金额：<span>{{item.real_reserve}}</span></p>
+                                <div slot="reference" class="name-wrapper">
+                                    <el-tag size="medium">{{ scope.row.real_reserve }}</el-tag>
+                                </div>
+                            </el-popover>
+                        </template>
                     </el-table-column>
                     <el-table-column
                         label='操作'>
@@ -144,6 +159,8 @@
             <el-table
                 :data="partner_list"
                 height="80%"
+                @row-click='rowchange'
+                key='partnerlist'
                 style="width: 100%;font-size: 14px;">
                 <el-table-column
                     prop="name"
@@ -157,6 +174,15 @@
                     prop="sh_percent"
                     label='分红'>
                 </el-table-column>
+                <el-table-column
+                    prop="logic_reserve"
+                    label='需存备用金'>
+                </el-table-column>
+                <el-table-column
+                    prop="real_reserve"
+                    label='已存备用金'>
+                </el-table-column>
+
             </el-table>
         </template>
         <template v-else-if='radio == 3'>
@@ -202,6 +228,10 @@
                 <el-table-column
                     prop="cost_rent"
                     label='场地'>
+                </el-table-column>
+                <el-table-column
+                    prop="cost_all"
+                    label='总运营成本'>
                 </el-table-column>
             </el-table>
         </template>
@@ -264,6 +294,26 @@
                 </el-table>
             </template>
         </div>
+        <el-dialog title="合伙人修改" :visible.sync="dialogFormVisible" width='500px'>
+            <el-form :model="form" v-loading='loading'>
+                <el-form-item label="合伙人" label-width="120px">
+                    <el-input v-model="form.name" style='width: 203px;' disabled></el-input>
+                </el-form-item>
+                <el-form-item label="分红" label-width="120px">
+                    <el-input type="input" v-model="form.sh_percent" style='width: 203px;'></el-input>
+                </el-form-item>
+                <el-form-item label="设备数" label-width="120px">
+                    <el-input type="input" v-model="form.device_number" style='width: 203px;'></el-input>
+                </el-form-item>
+                <el-form-item label="备用金" label-width="120px">
+                    <el-input type="input" v-model="form.real_reserve" style='width: 203px;'></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click='setparentinfo'>确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -308,12 +358,48 @@
                 sh_percent: '',
                 remark: '',
                 reckonloading:false,
+                form:{},
+                dialogFormVisible:false
             }
         },
         mounted: function () {
             this.getshareholderslist()
         },
         methods: {
+            rowchange: function (row) {
+                this.form = {
+                    device_number:row.devices_num,
+                    real_reserve:row.real_reserve,
+                    id:row.id,
+                    name:row.name,
+                    sh_percent:row.sh_percent,
+                }
+                this.dialogFormVisible = true;
+            },
+            setparentinfo: function () {
+                let vm = this;
+                vm.$axios({
+                    method:'post',
+                    url:window.$g_Api+'/oa/setpartnerInfo',
+                    data:{
+                        token: vm.token,
+                        uid: vm.uid,
+                        id:vm.form.id,
+                        device_number:vm.form.device_number,
+                        real_reserve:vm.form.real_reserve,
+                        sh_percent:vm.form.sh_percent,
+                    }
+                })
+                   .then(function(res){
+                       if(res.data.code == 0){
+                           vm.getshareholderslist();
+                           vm.dialogFormVisible = false;
+                       }else {
+                           vm.$alert(res.data.message)
+                       }
+                   })
+                   .catch(function(err){});
+            },
             handleSelectionChange: function (val) {
                 let arr = [];
                 for (let i = 0, len = val.length; i < len; i++) {
@@ -588,7 +674,8 @@
                     })
                     .catch(function (err) {
                     });
-            }
+            },
+
         }
     }
 </script>

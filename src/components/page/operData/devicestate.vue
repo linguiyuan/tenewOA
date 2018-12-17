@@ -11,6 +11,9 @@
             </el-date-picker>
             <el-button type="primary" style='margin-left: 20px;' @click='getdata'>查询</el-button>
         </div>
+        <div style='width: 100%;height: 32px;margin-bottom: 10px;'>
+            <el-button @click='setstate' style='float: right;' type="primary" :loading='loading'>保存更新</el-button>
+        </div>
         <template>
             <el-table
                 :data="tableData"
@@ -29,40 +32,50 @@
                     :key='item'
                     :label="item+'号'">
                     <template slot-scope="scope">
-                        <span class='boxw' style='color: #67C23A;' v-if='scope.row.data["i"+item]=="推广完成"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.remark,scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
-                        <span class='boxw' style='color: #E6A23C;' v-else-if='scope.row.data["i"+item]=="推广中"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.remark,scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
-                        <span class='boxw' style='color: #F56C6C;' v-else-if='scope.row.data["i"+item]=="暂停推广"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.remark,scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
-                        <span class='boxw' v-else @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.remark,scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
+                        <span class='boxw' style='color: #67C23A;' v-if='scope.row.data["i"+item]=="推广完成"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
+                        <span class='boxw' style='color: #E6A23C;' v-else-if='scope.row.data["i"+item]=="推广中"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
+                        <span class='boxw' style='color: #F56C6C;' v-else-if='scope.row.data["i"+item]=="暂停推广"' @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
+                        <span class='boxw' v-else @click='showbox(scope.row.name,item,scope.row.data["i"+item],scope.row.eid)'>{{scope.row.data['i'+item]}}</span>
                     </template>
                 </el-table-column>
             </el-table>
         </template>
 
-        <el-dialog title="修改设备状态" :visible.sync="dialogFormVisible" width='500px'>
-            <el-form :model="form" v-loading='loading'>
-                <el-form-item label="设备号" label-width="120px">
-                    <el-input v-model="form.name" style='width: 203px;' disabled></el-input>
-                </el-form-item>
-                <el-form-item label="日期" label-width="120px">
-                    <el-input v-model="form.date" style='width: 203px;' disabled></el-input>
-                </el-form-item>
-                <el-form-item label="状态" label-width="120px">
-                    <el-select v-model="form.state" placeholder="选择状态">
-                        <el-option label="推广完成" value="推广完成"></el-option>
-                        <el-option label="暂停推广" value="暂停推广"></el-option>
-                        <el-option label="推广中" value="推广中"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="备注" label-width="120px">
-                    <el-input type="textarea" v-model="form.remark" style='width: 203px;'></el-input>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="setstate">确 定</el-button>
-            </div>
-        </el-dialog>
-
+        <!--<el-dialog title="修改设备状态" :visible.sync="dialogFormVisible" width='500px'>-->
+            <!--<el-form :model="form" v-loading='loading'>-->
+                <!--<el-form-item label="设备号" label-width="120px">-->
+                    <!--<el-input v-model="form.name" style='width: 203px;' disabled></el-input>-->
+                <!--</el-form-item>-->
+                <!--<el-form-item label="日期" label-width="120px">-->
+                    <!--<el-input v-model="form.date" style='width: 203px;' disabled></el-input>-->
+                <!--</el-form-item>-->
+                <!--<el-form-item label="状态" label-width="120px">-->
+                    <!--<el-select v-model="form.state" placeholder="选择状态">-->
+                        <!--<el-option label="推广完成" value="推广完成"></el-option>-->
+                        <!--<el-option label="暂停推广" value="暂停推广"></el-option>-->
+                        <!--<el-option label="推广中" value="推广中"></el-option>-->
+                    <!--</el-select>-->
+                <!--</el-form-item>-->
+                <!--<el-form-item label="备注" label-width="120px">-->
+                    <!--<el-input type="textarea" v-model="form.remark" style='width: 203px;'></el-input>-->
+                <!--</el-form-item>-->
+            <!--</el-form>-->
+            <!--<div slot="footer" class="dialog-footer">-->
+                <!--<el-button @click="dialogFormVisible = false">取 消</el-button>-->
+                <!--<el-button type="primary" @click="setstate">确 定</el-button>-->
+            <!--</div>-->
+        <!--</el-dialog>-->
+        <div id="setbox" v-show="dialogFormVisible">
+            <!--<el-input v-model="form.date" style='width: 203px;' disabled></el-input>-->
+            <!--<el-input v-model="form.name" style='width: 203px;' disabled></el-input>-->
+            <el-select v-model="form.state" placeholder="选择状态" @change='changestate'>
+                <el-option label="推广完成" value="推广完成"></el-option>
+                <el-option label="暂停推广" value="暂停推广"></el-option>
+                <el-option label="推广中" value="推广中"></el-option>
+            </el-select>
+            <!--<el-input type="textarea" v-model="form.remark" style='width: 203px;' placeholder='备注'></el-input>-->
+            <!--<el-button type='primary' plain size="mini">确定</el-button>-->
+        </div>
 
     </div>
 </template>
@@ -77,11 +90,16 @@ export default{
             month:'',
             days:[],
             tableData:[],
+            tableData1:[],
             dialogFormVisible:false,
             form:{
                 state:''
             },
-            loading:false
+            loading:false,
+            x:0,
+            y:0,
+            newstate:[],
+            loading:false,
         }
     },
     mounted: function () {
@@ -92,43 +110,68 @@ export default{
     },
     methods:{
         //打开设置box
-        showbox: function (name,day,state,remark,eid) {
-            console.log(eid);
+        showbox: function (name,day,state,eid) {
             this.dialogFormVisible = true;
+            this.form.i = day;
             day > 9?day=this.month+'-'+day:day=this.month+'-0'+day;
             this.form.name=name;
             this.form.date=day;
+            if(!state){
+                this.form.state=''
+            }
             this.form.state =state;
-            this.form.remark =remark;
+            // this.form.remark =remark;
             this.form.eid =eid;
+            let e = window.event;
+            let scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+            let scrollLeft=document.documentElement.scrollLeft||document.body.scrollLeft;
+            this.x = e.pageX+scrollLeft;
+            this.y = e.pageY+scrollTop;
+            let the = document.getElementById('setbox');
+            the.style.top = this.y+'px';
+            the.style.left = this.x+40+'px';
+        },
+        changestate: function () {
+            let vm = this;
+            let arr = [...vm.tableData]
+            for(let i = 0 ,len = arr.length ; i < len; i++){
+                if(vm.form.eid == arr[i].eid){
+                    arr[i].data['i'+vm.form.i] = vm.form.state;
+                }
+            }
+            vm.tableData = arr;
+            if(this.newstate.length > 0){
+                for(let i = 0 ,len = vm.newstate.length ; i < len; i++){
+                    if(vm.form.eid == vm.newstate[i].eid){
+                        vm.newstate[i] = {date:vm.form.date,state:vm.form.state,eid:vm.form.eid}
+                    }else {
+                        vm.newstate.push({date:vm.form.date,state:vm.form.state,eid:vm.form.eid})
+                    }
+                }
+            }else {
+                vm.newstate.push({date:vm.form.date,state:vm.form.state,eid:vm.form.eid})
+            }
+            vm.dialogFormVisible = false;
         },
         //设置状态
         setstate: function () {
             let vm = this;
             vm.loading = true;
-            console.log(vm.form.eid);
             vm.$axios({
                 method:'post',
                 url:window.$g_Api+'/oa/set_device_state',
                 data:{
                     token:vm.token,
                     uid:vm.uid,
-                    date:vm.form.date,
-                    state:vm.form.state,
-                    remark:vm.form.remark,
-                    eid:vm.form.eid,
+                    data:vm.newstate
                 }
             })
                .then(function(res){
+                   vm.$alert(res.data.message);
                    vm.loading = false;
-                   if(res.data.code == 0){
-                       vm.getdata();
-                       vm.dialogFormVisible = false;
-                   }else {
-                       vm.$alert(res.data.message);
-                   }
+                   vm.getdata();
                })
-               .catch(function(err){});
+               .catch(function(err){vm.getdata();});
         },
         getdays: function (data) {
             let date = new Date(data);//构造当前日期对象
@@ -163,6 +206,7 @@ export default{
             })
                .then(function(res){
                    vm.tableData = res.data.data;
+                   vm.tableData1 = res.data.data;
                })
                .catch(function(err){});
         }
@@ -179,11 +223,25 @@ export default{
     }
     .boxw{
         display: block;
-        width: 80px;
+        width: 100%;
         height: 24px;
         &:hover{
             cursor: pointer;
         }
+    }
+    #setbox{
+        /*height: 240px;*/
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 88;
+        /*background-color: #ffffff;*/
+        /*padding: 15px;*/
+        /*border-radius: 5px;*/
+        /*display: flex;*/
+        /*flex-direction: column;*/
+        /*justify-content: space-between;*/
+        /*border:1px solid #909399;*/
     }
 }
 </style>

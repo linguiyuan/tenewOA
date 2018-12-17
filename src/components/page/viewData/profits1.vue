@@ -249,8 +249,6 @@
                         </el-form>
                     </template>
                 </el-table-column>
-
-
                 <el-table-column
                     prop="request_month"
                     label='月份'>
@@ -316,24 +314,78 @@
                     label="合伙人">
                 </el-table-column>
                 <el-table-column
+                    width='120px'
+                    prop="partner_single_profit1"
+                    label='单客佣金1'>
+                </el-table-column>
+                <el-table-column
+                    width='120px'
+                    prop="partner_single_profit2"
+                    label='单客佣金2'>
+                </el-table-column>
+                <el-table-column
                     prop="partner_ratio"
                     label='分红比'>
                 </el-table-column>
                 <el-table-column
+                    width='140px'
                     prop="partner_own_device_num"
                     label='拥有设备数'>
                 </el-table-column>
                 <el-table-column
-                    prop="per_customer_profit"
-                    label='单客收益'>
+                    width='140px'
+                    prop="single_profit_avg"
+                    label='综合月单客佣金'>
                 </el-table-column>
                 <el-table-column
-                    prop="per_device_customer"
-                    label='单设备客户数'>
+                    width='140px'
+                    prop="partner_single_cost"
+                    label='月单客成本'>
                 </el-table-column>
                 <el-table-column
-                    prop="partner_profit"
-                    label='分红'>
+                    width='140px'
+                    prop="month_single_profit"
+                    label='月单客红利'>
+                </el-table-column>
+                <el-table-column
+                    width='140px'
+                    prop="partner_customer_avg"
+                    label='设备平均客户人数'>
+                </el-table-column>
+                <el-table-column
+                    width='140px'
+                    prop="partner_single_cibuluo"
+                    label='朋友圈收益'>
+                </el-table-column>
+                <el-table-column
+                    width='140px'
+                    prop="partner_single_profit"
+                    label='合伙人单客红利'>
+                </el-table-column>
+                <el-table-column
+                    width='140px'
+                    prop="single_device_output"
+                    label='单设备产出'>
+                </el-table-column>
+                <el-table-column
+                    width='140px'
+                    prop="single_device_cost"
+                    label='单设备成本'>
+                </el-table-column>
+                <el-table-column
+                    width='140px'
+                    prop="single_device_profit"
+                    label='单设备红利'>
+                </el-table-column>
+                <el-table-column
+                    width='140px'
+                    prop="partner_device_profit"
+                    label='合伙人设备红利'>
+                </el-table-column>
+                <el-table-column
+                    width='140px'
+                    prop="single_device_output_avg"
+                    label='合伙人分红'>
                 </el-table-column>
             </el-table>
         </template>
@@ -397,8 +449,6 @@
                 })
                     .then(function (res) {
                         if (res.data.type == 0) {
-                            vm.show = true;
-                            vm.type = 1;
                             vm.tableData = res.data.data.shareholders;
                             vm.tableData1 = res.data.data.partners;
                             vm.total_cost = res.data.total_cost
@@ -412,6 +462,14 @@
                             }
                             vm.gs = a1.toFixed(2);
                             vm.gd = a2.toFixed(2);
+                            vm.show = true;
+                            if(vm.type == 1){
+                                vm.type = 1
+                            }else if(vm.type == 2){
+                                vm.type = 2
+                            }else if(vm.type == 3){
+                                vm.type = 1
+                            }
                         } else {
                             vm.type = res.data.type;
                             if (res.data.type == 1) {

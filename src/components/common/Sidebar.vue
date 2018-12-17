@@ -99,12 +99,11 @@
                             power: power.check_order,
 
                         },
-                        {
-                            index: 'groupdata',
-                            title: '分组数据',
-                            power: power.groupdata,
-
-                        },
+                        // {
+                        //     index: 'groupdata',
+                        //     title: '分组数据',
+                        //     power: power.groupdata,
+                        // },
                     ]
                     //    各项数据(各类数据展示),每日数据(单项数据展示,按日期排序),用户数统计(记录操作日志)
                 },
@@ -151,6 +150,11 @@
                             index: 'groupmanagement',
                             title: '分组管理',
                             power: power.groupmanagement,
+                        },
+                        {
+                            index: 'accountoutput',
+                            title: '账号产出',
+                            power: power.accountoutput,
                         },
                     ]
                 },
